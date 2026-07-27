@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Personal Wealth Map™ — InsightMaps</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="InsightMaps">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --bg:#F5F5F7; --card:#FFFFFF; --ink:#1D1D1F; --muted:#6E6E73; --hair:#D2D2D7;
+  --accent:#0071E3; --line:#C7C7CC;
+  --src-t:#E8F4ED; --src-d:#1D7A3E; --src-b:#BFE3CC;
+  --use-t:#E9F1FB; --use-d:#0B5CAB; --use-b:#C2D9F2;
+  --base-t:#F0EDFA; --base-d:#5E48B5; --base-b:#D6CEF0;
+  --flag-pri:#E0A200; --flag-imp:#5B6B86;
+  --brand-blue:#2D6CBB; --brand-orange:#F9A801; --brand-word:#647E96;
+  --r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:16px;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;padding:0}
+
+/* ---------- header ---------- */
+.hdr{position:sticky;top:0;z-index:40;background:rgba(245,245,247,.82);
+  backdrop-filter:saturate(1.6) blur(18px);-webkit-backdrop-filter:saturate(1.6) blur(18px);
+  border-bottom:1px solid rgba(0,0,0,.07)}
+.hrow{display:flex;align-items:center;gap:12px;max-width:1180px;margin:0 auto;padding:10px 16px}
+.siteback{display:none;width:32px;height:32px;border-radius:50%;align-items:center;justify-content:center;flex:0 0 auto}
+.siteback:hover{background:rgba(0,0,0,.06)}
+.siteback svg{width:18px;height:18px;stroke:var(--ink);stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.brand .mark{width:24px;height:27px;flex:0 0 auto}
+.wordwrap{min-width:0}
+.word{font-weight:750;letter-spacing:-.01em;font-size:16px;white-space:nowrap}
+.word sup{font-size:9px;font-weight:600;color:var(--muted)}
+.hint{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hspace{flex:1}
+.hbtns{display:flex;align-items:center;gap:8px}
+.searchwrap{position:relative}
+#searchIn{width:190px;padding:7px 12px 7px 30px;border:1px solid var(--hair);border-radius:99px;
+  background:var(--card);font-size:13px;color:var(--ink);outline:none}
+#searchIn:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,113,227,.15)}
+.searchwrap .sicon{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--muted);stroke-width:2;fill:none;pointer-events:none}
+.sdrop{position:absolute;top:calc(100% + 8px);right:0;width:min(400px,92vw);max-height:min(430px,60vh);overflow:auto;
+  background:var(--card);border:1px solid var(--hair);border-radius:14px;box-shadow:0 18px 44px rgba(0,0,0,.16);display:none;z-index:60}
+.sdrop.open{display:block}
+.srow{display:block;width:100%;text-align:left;padding:10px 14px;border-bottom:1px solid #F0F0F2;cursor:pointer}
+.srow:last-child{border-bottom:none}
+.srow:hover,.srow.kb{background:#F5F8FD}
+.srow .st{font-size:13.5px;font-weight:600}
+.srow .st mark{background:rgba(0,113,227,.16);color:inherit;border-radius:3px;padding:0 1px}
+.srow .strail{font-size:11px;color:var(--muted);margin-top:2px}
+.snone{padding:14px;font-size:13px;color:var(--muted)}
+.pill{padding:7px 14px;border:1px solid var(--hair);border-radius:99px;background:var(--card);font-size:13px;font-weight:600;white-space:nowrap}
+.pill:hover{border-color:#B8B8BD}
+.pill.expand{display:none;color:var(--accent);border-color:rgba(0,113,227,.4)}
+
+/* ---------- stage selector ---------- */
+.stagebar{position:sticky;top:53px;z-index:35;background:rgba(245,245,247,.82);
+  backdrop-filter:saturate(1.6) blur(18px);-webkit-backdrop-filter:saturate(1.6) blur(18px);
+  border-bottom:1px solid rgba(0,0,0,.06)}
+.stagein{max-width:1180px;margin:0 auto;padding:8px 16px;display:flex;align-items:center;gap:10px}
+.stagelbl{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--muted);white-space:nowrap;flex:0 0 auto}
+.stagescroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;padding:2px}
+.stagescroll::-webkit-scrollbar{display:none}
+.stagechip{flex:0 0 auto;padding:6px 13px;border-radius:99px;font-size:12.5px;font-weight:600;color:var(--muted);
+  background:transparent;border:1px solid transparent;transition:all .15s ease}
+.stagechip:hover{color:var(--ink)}
+.stagechip.on{background:var(--ink);color:#fff}
+.stagechip .age{font-weight:500;opacity:.75;font-size:11px}
+
+/* ---------- breadcrumb ---------- */
+.crumbbar{max-width:1180px;margin:0 auto;padding:10px 16px 0;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.crumb{color:var(--muted)}
+.crumb.link{cursor:pointer;color:var(--accent)}
+.crumb.link:hover{text-decoration:underline}
+.csep{opacity:.55}
+.cspace{flex:1}
+.flagsbtn{display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--hair);border-radius:99px;background:var(--card);font-size:12px;font-weight:600;color:var(--ink)}
+.flagsbtn .cnt{background:var(--ink);color:#fff;border-radius:99px;font-size:10.5px;min-width:17px;height:17px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
+
+/* ---------- map stage ---------- */
+.stage{position:relative;max-width:1180px;margin:0 auto;padding:18px 16px 90px}
+#links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#links path{stroke:var(--line);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tree{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:34px}
+
+.card{background:var(--card);border-radius:var(--r);border:1px solid rgba(0,0,0,.055);
+  box-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 22px rgba(0,0,0,.05);position:relative}
+.clickable{cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
+.clickable:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(0,0,0,.06),0 14px 30px rgba(0,0,0,.10)}
+
+.anc{width:min(430px,88vw);padding:9px 16px;display:flex;align-items:center;gap:10px;border-radius:14px}
+.anc .up{width:16px;height:16px;stroke:var(--muted);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.anc .at{font-size:13px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.anc.apexanc{background:var(--ink);color:#fff;border-color:var(--ink)}
+.anc.apexanc .up{stroke:rgba(255,255,255,.8)}
+
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.14em;opacity:.82;margin-bottom:6px}
+.focus{width:min(520px,92vw);padding:22px 26px;text-align:center}
+.focus.apex{background:var(--ink);color:#fff;border-color:var(--ink)}
+.focus.apex .fd{color:rgba(255,255,255,.72)}
+.focus .ft{font-weight:750;letter-spacing:-.015em;font-size:24px;line-height:1.15}
+.focus .ft sup{font-size:11px;font-weight:600;opacity:.7}
+.focus .fd{font-size:13.5px;color:var(--muted);margin-top:7px;line-height:1.45}
+.flagdot{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;border:1.6px solid var(--hair);background:var(--card);cursor:pointer;z-index:2}
+.flagdot:hover{border-color:#A8A8AD}
+.flagdot.imp{background:var(--flag-imp);border-color:var(--flag-imp)}
+.flagdot.pri{background:var(--flag-pri);border-color:var(--flag-pri)}
+.focus.apex .flagdot{display:none}
+
+.kids{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;max-width:1080px}
+.child{width:240px;padding:16px 18px;text-align:left}
+.child .ct{font-weight:700;font-size:15.5px;letter-spacing:-.01em;line-height:1.2}
+.child .cd{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.4}
+.child .cmeta{display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:11.5px;color:var(--muted)}
+.child .arrow{width:15px;height:15px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tint-src{background:var(--src-t);border-color:var(--src-b)} .tint-src .eyebrow{color:var(--src-d)}
+.tint-use{background:var(--use-t);border-color:var(--use-b)} .tint-use .eyebrow{color:var(--use-d)}
+.tint-base{background:var(--base-t);border-color:var(--base-b)} .tint-base .eyebrow{color:var(--base-d)}
+.edge-src{border-top:3px solid var(--src-d)} .edge-use{border-top:3px solid var(--use-d)} .edge-base{border-top:3px solid var(--base-d)}
+
+/* ---------- key part terminal view ---------- */
+.pairrow{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;width:100%}
+.paircard{width:min(340px,92vw);padding:18px 20px;text-align:left}
+.paircard .pairhead{line-height:1.5}
+.paircard .listwrap{margin-top:10px;display:flex;flex-direction:column}
+.itemrow{display:flex;align-items:flex-start;gap:9px;padding:7px 2px;border-bottom:1px solid rgba(0,0,0,.05);position:relative}
+.itemrow:last-child{border-bottom:none}
+.itemrow .dot{width:6px;height:6px;border-radius:50%;margin-top:7px;flex:0 0 auto}
+.itemrow .itxt{font-size:13.5px;line-height:1.45;flex:1}
+.itemrow .iflag{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--hair);background:var(--card);cursor:pointer;flex:0 0 auto;margin-top:2px}
+.itemrow .iflag:hover{border-color:#A8A8AD}
+.itemrow .iflag.imp{background:var(--flag-imp);border-color:var(--flag-imp)}
+.itemrow .iflag.pri{background:var(--flag-pri);border-color:var(--flag-pri)}
+.itemrow.pulse{animation:pulse 1.6s ease 2}
+@keyframes pulse{0%,100%{background:transparent}30%{background:rgba(0,113,227,.14)}}
+
+.guide{width:min(716px,92vw);padding:24px 28px;text-align:left}
+.guide .gstage{font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--accent);margin-bottom:8px}
+.guide .gh{font-weight:750;font-size:17px;letter-spacing:-.01em;line-height:1.3}
+.guide .gh .gtail{font-weight:500;color:var(--muted)}
+.guide .gc{font-size:14px;line-height:1.55;color:#3A3A3E;margin-top:10px}
+.dolists{display:flex;gap:22px;margin-top:18px;flex-wrap:wrap}
+.dolist{flex:1;min-width:250px}
+.dolist .dh{font-size:11px;font-weight:700;letter-spacing:.12em;margin-bottom:8px}
+.dolist.dos .dh{color:#1D7A3E}
+.dolist.avoids .dh{color:#B4232C}
+.dolist ul{list-style:none;margin:0;padding:0}
+.dolist li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.5;padding:5px 0}
+.dolist li>span{flex:1;padding-top:3px}
+.bub{width:26px;height:26px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  border:1.5px solid transparent;cursor:pointer;transition:background .15s ease,border-color .15s ease}
+.bub svg{width:14px;height:14px;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.dolist.dos .bub{background:#E6F3EB;border-color:#C6E4D2} .dolist.dos .bub svg{stroke:#1D7A3E}
+.dolist.avoids .bub{background:#FBEAEB;border-color:#F1CDCF} .dolist.avoids .bub svg{stroke:#B4232C}
+.bub:hover{border-color:#9A9AA0}
+.dolist li.imp .bub{background:var(--flag-imp) !important;border-color:var(--flag-imp) !important}
+.dolist li.pri .bub{background:var(--flag-pri) !important;border-color:var(--flag-pri) !important}
+.dolist li.imp .bub svg,.dolist li.pri .bub svg{stroke:#fff !important}
+.term{color:var(--accent);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px;font:inherit;cursor:pointer;background:none;border:none;padding:0}
+.term:hover{text-decoration-thickness:2px}
+#termPanel{max-width:430px}
+#termPanel .tname{font-size:17px;font-weight:750;letter-spacing:-.01em;margin:0 24px 8px 0}
+#termPanel .tdef{font-size:14px;line-height:1.6;color:#3A3A3E;margin:0}
+
+/* ---------- legend ---------- */
+.legend{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(245,245,247,.88);
+  backdrop-filter:saturate(1.6) blur(18px);-webkit-backdrop-filter:saturate(1.6) blur(18px);
+  border-top:1px solid rgba(0,0,0,.07)}
+.legin{max-width:1180px;margin:0 auto;padding:8px 16px;display:flex;align-items:center;gap:16px;font-size:11px;color:var(--muted)}
+.lgi{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.lgsw{width:11px;height:11px;border-radius:4px;border:1px solid rgba(0,0,0,.12)}
+.lgspace{flex:1}
+.lgbrand{display:flex;align-items:center;gap:6px;color:var(--brand-word);font-weight:650;font-size:12px}
+.lgbrand .mark{width:15px;height:17px}
+
+/* ---------- panels ---------- */
+.ovl{position:fixed;inset:0;background:rgba(0,0,0,.34);z-index:70;display:none;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow:auto}
+.ovl.open{display:flex}
+.panel{background:var(--card);border-radius:20px;max-width:640px;width:100%;padding:28px 30px;box-shadow:0 30px 80px rgba(0,0,0,.3);position:relative}
+.panel .x{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:#F0F0F2;display:flex;align-items:center;justify-content:center}
+.panel .x:hover{background:#E4E4E8}
+.panel .x svg{width:13px;height:13px;stroke:var(--muted);stroke-width:2.4;stroke-linecap:round}
+.panel h2{margin:0 0 4px;font-size:20px;font-weight:750;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+.panel h2 .mark{width:20px;height:23px}
+.panel h2 sup{font-size:10px;color:var(--muted)}
+.panel p{font-size:14px;line-height:1.6;color:#3A3A3E}
+.panel .credit{font-size:13px;color:var(--muted)}
+.panel .disc{font-size:12px;color:var(--muted);line-height:1.55;border-top:1px solid var(--hair);padding-top:12px;margin-top:16px}
+.afoot{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--hair);margin-top:16px;padding-top:12px;font-size:11.5px;color:var(--muted)}
+.afoot .lgbrand{font-size:12px}
+.fgroup{margin-top:14px}
+.fgh{font-size:11px;font-weight:700;letter-spacing:.11em;color:var(--muted);margin-bottom:6px}
+.frow{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid #F0F0F2;font-size:13.5px}
+.frow .fsw{width:12px;height:12px;border-radius:50%;flex:0 0 auto;margin-top:3px}
+.frow .ftrail{font-size:11px;color:var(--muted);margin-top:2px}
+.fempty{font-size:13.5px;color:var(--muted);padding:12px 0}
+.pactions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+
+/* ---------- A2HS ---------- */
+#a2hs{position:fixed;left:12px;right:12px;bottom:14px;z-index:80;background:var(--card);border-radius:18px;
+  box-shadow:0 16px 44px rgba(0,0,0,.24);padding:14px 44px 14px 14px;display:none;align-items:center;gap:12px}
+#a2hs.show{display:flex}
+#a2hs .tile{width:44px;height:44px;border-radius:11px;background:var(--brand-orange);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+#a2hs .tile svg{width:24px;height:27px}
+#a2hs .a2t{font-size:13.5px;font-weight:700}
+#a2hs .a2d{font-size:12px;color:var(--muted);line-height:1.45}
+#a2hs .a2d svg{width:13px;height:13px;vertical-align:-2px;stroke:var(--accent);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+#a2hsClose{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:#F0F0F2;display:flex;align-items:center;justify-content:center}
+#a2hsClose svg{width:11px;height:11px;stroke:var(--muted);stroke-width:2.4;stroke-linecap:round}
+
+/* ---------- expand ---------- */
+.expandwrap{max-width:1180px;margin:0 auto;padding:0 16px;display:flex;justify-content:flex-end}
+.expandwrap .pill.expand{text-align:center;margin-top:2px;margin-bottom:8px}
+
+/* ---------- print ---------- */
+#printRoot{display:none}
+@media print{
+  body>*:not(#printRoot){display:none !important}
+  body{background:#fff}
+  #printRoot{display:block;font-size:10px;color:#111}
+  .pp-h{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:10px}
+  .pp-h .t{font-size:17px;font-weight:800;letter-spacing:-.01em}
+  .pp-h .sub{font-size:9px;color:#555;max-width:400px;line-height:1.4;margin-top:3px}
+  .pp-area{margin:10px 0 4px;font-size:11px;font-weight:800;letter-spacing:.08em;border-bottom:1px solid #bbb;padding-bottom:3px}
+  .pp-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .pp-kp{border:1px solid #ccc;border-radius:6px;padding:6px 8px;width:23.5%;break-inside:avoid}
+  .pp-kp .n{font-weight:800;font-size:9.5px}
+  .pp-kp .d{color:#555;font-size:8px;margin:2px 0 4px;line-height:1.3}
+  .pp-kp .lh{font-size:7px;font-weight:800;letter-spacing:.08em;color:#666;margin-top:4px}
+  .pp-kp ul{margin:2px 0 0;padding-left:12px}
+  .pp-kp li{font-size:8px;line-height:1.35}
+  .pfoot,.rfoot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #999;margin-top:12px;padding-top:6px;font-size:8.5px;color:#555}
+  .rp-meta{display:flex;gap:18px;font-size:9px;color:#444;margin:8px 0 12px}
+  .rp-meta b{font-size:12px;display:block}
+  .rp-row{border-bottom:1px solid #ddd;padding:5px 0;break-inside:avoid}
+  .rp-row .rt{font-weight:700;font-size:10px}
+  .rp-row .rtrail{font-size:8.5px;color:#666}
+  .rp-flag{display:inline-block;font-size:7.5px;font-weight:800;letter-spacing:.06em;padding:1px 6px;border-radius:99px;color:#fff;margin-right:6px}
+}
+
+/* ---------- responsive ---------- */
+@media (min-width:1100px){
+  .focus{width:min(560px,92vw)} .focus .ft{font-size:26px}
+  .child{width:252px}
+  .paircard{width:min(360px,92vw)}
+  .guide{width:min(752px,92vw)}
+}
+@media (max-width:760px),(max-height:620px){
+  .pill.expand.embedded{display:inline-block}
+}
+@media (max-width:640px){
+  .hrow{flex-wrap:wrap;row-gap:8px}
+  #searchIn{width:150px}
+  .hint{display:none}
+  .stagebar{top:52.5px}
+  .legend{display:none}
+  .stage{padding-bottom:36px}
+  .tree{gap:26px}
+  .focus{padding:18px 18px} .focus .ft{font-size:20px}
+  .kids{gap:10px}
+  .child{width:calc(50% - 5px);min-width:150px;padding:13px 13px}
+  .child .ct{font-size:14px}
+  .paircard{width:min(430px,100%)}
+  .guide{padding:20px 18px;width:100%}
+  .dolists{flex-direction:column;gap:14px}
+}
+@media (pointer:coarse){
+  .flagdot{width:24px;height:24px}
+  .itemrow .iflag{width:20px;height:20px}
+  .stagechip{padding:8px 14px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="im-mark" viewBox="0 0 32 36">
+    <path d="M16 1C8.3 1 2 7.1 2 14.6c0 5.3 3 9.3 6.4 12.9L16 35l7.6-7.5C27 24 30 19.9 30 14.6 30 7.1 23.7 1 16 1z" fill="#2D6CBB"/>
+    <circle cx="16" cy="13.4" r="6.1" fill="#FFFFFF"/>
+    <path d="M16 9.2a4.2 4.2 0 0 0-2.2 7.8v1.4h4.4V17a4.2 4.2 0 0 0-2.2-7.8z" fill="#F9A801"/>
+    <rect x="14.5" y="18.8" width="3" height="1.3" rx=".6" fill="#2D6CBB"/>
+  </symbol>
+</svg>
+
+<header class="hdr">
+  <div class="hrow">
+    <a id="siteBack" class="siteback" href="https://insightmaps.org" target="_top" aria-label="Back to insightmaps.org" style="display:none">
+      <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <div class="brand">
+      <svg class="mark"><use href="#im-mark"/></svg>
+      <div class="wordwrap">
+        <div class="word">PERSONAL WEALTH MAP<sup>™</sup></div>
+        <div class="hint">Tap a card to drill down · tap the path above to back out</div>
+      </div>
+    </div>
+    <div class="hspace"></div>
+    <div class="hbtns">
+      <div class="searchwrap">
+        <svg class="sicon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+        <input id="searchIn" type="text" placeholder="Search the map" autocomplete="off">
+        <div id="sdrop" class="sdrop"></div>
+      </div>
+      <button class="pill" id="printBtn">Print</button>
+      <button class="pill" id="aboutBtn">About</button>
+      <button class="pill" id="topBtn">Top</button>
+    </div>
+  </div>
+  <div class="expandwrap"><a class="pill expand" id="expandBtn" target="_top">Open full screen ↗</a></div>
+</header>
+
+<div class="stagebar">
+  <div class="stagein">
+    <div class="stagelbl">MY LIFE STAGE</div>
+    <div class="stagescroll" id="stageChips"></div>
+  </div>
+</div>
+
+<div class="crumbbar">
+  <span id="crumbs"></span>
+  <span class="cspace"></span>
+  <button class="flagsbtn" id="flagsBtn">Flags <span class="cnt" id="flagCnt">0</span></button>
+</div>
+
+<main class="stage" id="stageEl">
+  <svg id="links"></svg>
+  <div class="tree" id="tree"></div>
+</main>
+
+<div class="legend">
+  <div class="legin">
+    <span class="lgi"><span class="lgsw" style="background:var(--src-t);border-color:var(--src-b)"></span>Money Sources</span>
+    <span class="lgi"><span class="lgsw" style="background:var(--use-t);border-color:var(--use-b)"></span>Money Uses</span>
+    <span class="lgi"><span class="lgsw" style="background:var(--base-t);border-color:var(--base-b)"></span>Wealth Base</span>
+    <span class="lgi"><span class="lgsw" style="background:var(--flag-pri);border-radius:50%"></span>Priority</span>
+    <span class="lgi"><span class="lgsw" style="background:var(--flag-imp);border-radius:50%"></span>Needs improvement</span>
+    <span class="lgspace"></span>
+    <span class="lgi" style="color:var(--muted)">Open a Key Part to see its guide for your life stage.</span>
+    <span class="lgbrand"><svg class="mark"><use href="#im-mark"/></svg>InsightMaps</span>
+  </div>
+</div>
+
+<div class="ovl" id="aboutOvl"><div class="panel">
+  <button class="x" data-close="aboutOvl"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  <h2><svg class="mark"><use href="#im-mark"/></svg>Personal Wealth Map<sup>™</sup></h2>
+  <p class="credit">Created by Greg Dickinson · An InsightMaps framework</p>
+  <p>The Personal Wealth Map helps you build wealth and financial freedom over time. It organizes your financial life into three major wealth areas — <b>Money Sources</b> (how you create or obtain money and benefits), <b>Money Uses</b> (how you spend, pay, give, save and invest money), and <b>Wealth Base</b> (what you build, own and harvest) — and thirteen Key Parts within them.</p>
+  <p>Choose your <b>life stage</b> at the top of the map. Each Key Part then shows what it covers, the assets and enablers that strengthen it, and stage-specific guidance: what to focus on, things to do, and things to avoid at your point in life.</p>
+  <p>Use the flag circles to mark items as <b style="color:var(--flag-imp)">Needs improvement</b> (tap once) or <b style="color:var(--flag-pri)">Priority</b> (tap twice); tap a third time to clear. Your flags are saved on this device and can be printed as a one-page report.</p>
+  <p class="disc">General educational guidance only; individual circumstances may differ. This material is not financial, investment, tax or legal advice. Personal Wealth Map™ and InsightMaps™ are trademarks of GBD Ideas LLC.</p>
+  <div class="afoot">
+    <span>© 2026 GBD Ideas LLC. All rights reserved. www.insightmaps.org</span>
+    <span class="lgbrand"><svg class="mark"><use href="#im-mark"/></svg>InsightMaps</span>
+  </div>
+</div></div>
+
+<div class="ovl" id="flagsOvl"><div class="panel">
+  <button class="x" data-close="flagsOvl"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  <h2>Flagged items</h2>
+  <div id="flagsList"></div>
+  <div class="pactions">
+    <button class="pill" id="printReportBtn">Print priorities report</button>
+    <button class="pill" id="clearFlagsBtn">Clear all flags</button>
+  </div>
+</div></div>
+
+<div class="ovl" id="printOvl"><div class="panel">
+  <button class="x" data-close="printOvl"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  <h2>Print</h2>
+  <p>Choose what to print. In the print dialog, choose <b>Save as PDF</b> to keep a copy. Chrome or Edge give the best results. Flags are saved per device, so print from the device where you marked them.</p>
+  <div class="pactions">
+    <button class="pill" id="printPosterBtn">Full map</button>
+    <button class="pill" id="printReportBtn2">Improvement priorities report</button>
+  </div>
+</div></div>
+
+<div class="ovl" id="termOvl"><div class="panel" id="termPanel">
+  <button class="x" data-close="termOvl"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  <div class="tname" id="termName"></div>
+  <p class="tdef" id="termDef"></p>
+</div></div>
+
+<div id="a2hs">
+  <div class="tile"><svg><use href="#im-mark"/></svg></div>
+  <div>
+    <div class="a2t">Add this map to your Home Screen</div>
+    <div class="a2d">Tap the <b>Share</b> button <svg viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 12v8h14v-8"/></svg> then choose <b>“Add to Home Screen”</b> <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 9v6M9 12h6"/></svg></div>
+  </div>
+  <button id="a2hsClose"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+</div>
+
+<div id="printRoot"></div>
+
+<script>
+"use strict";
+/* ================= DATA ================= */
+var DATA = {"keyparts":[{"name":"Work Income","desc":"Money earned through work or enterprise.","examples":["Pay, bonuses & tips","Insurance, PTO & other benefits","Employer retirement contributions"],"enablers":["Skills & credentials","Motivation & persistence","Networks & opportunity"],"area":"MONEY SOURCES"},{"name":"Gifts & Aid","desc":"Resources received that don’t require repayment.","examples":["Scholarships & grants","Gifts & inheritances","529 college saving plans"],"enablers":["Awareness & eligibility","Initiative & persistence","Family & community support"],"area":"MONEY SOURCES"},{"name":"Debt Funding","desc":"Borrowed resources that must be repaid.","examples":["Loan distributions","Credit card draws","Credit line draws"],"enablers":["Credit access","Borrowing knowledge","Favorable terms"],"area":"MONEY SOURCES"},{"name":"Asset Income","desc":"Money produced by assets or accumulated benefits.","examples":["Dividends, interest & gains","Pensions & annuities","Retirement plan withdrawals","Social Security","Rental fees","Passive business income"],"enablers":["Income-producing assets","Reinvestment","Time & diversification"],"area":"MONEY SOURCES"},{"name":"Income Costs","desc":"Costs incurred because you earn income.","examples":["Taxes","Childcare","Income insurance"],"enablers":["Tax knowledge","Income deferral","Pre-tax contributions"],"area":"MONEY USES"},{"name":"Basic Living Needs","desc":"Costs of daily living and health.","examples":["Housing","Food","Clothing","Transport","Healthcare insurance and payments"],"enablers":["Cost awareness","Lower-cost alternatives","Shared resources & costs"],"area":"MONEY USES"},{"name":"Asset Costs","desc":"Costs of owning and maintaining assets.","examples":["Maintenance & repairs","Property taxes & fees","Asset insurance"],"enablers":["Ownership-cost awareness","Preventive maintenance","Budgeting & reserves"],"area":"MONEY USES"},{"name":"Debt & Giving","desc":"Payments to lenders and support to others.","examples":["Principal, interest & fees","Gifts & support for others"],"enablers":["Favorable credit terms","Repayment discipline","Giving discipline"],"area":"MONEY USES"},{"name":"Optional Spending","desc":"Optional spending on wants and lifestyle.","examples":["Entertainment","Travel","Dining or ordering out","Subscriptions","Other wants"],"enablers":["Spending discipline","Clear priorities","Investing tradeoffs"],"area":"MONEY USES"},{"name":"Saving & Investing","desc":"Money set aside for future needs and asset building.","examples":["Education & skill building","Emergency savings","Retirement contributions","Stocks, bonds & funds","Home or business investment"],"enablers":["Money to set aside","Clear goals & priorities","Suitable accounts & investments"],"area":"MONEY USES"},{"name":"Personal Assets","desc":"Capabilities, traits and relationships that increase your potential.","examples":["Drive & motivation","Education & credentials","Experience & skills","Health","Talents","Relationships & reputation"],"enablers":["Learning opportunities","Health & energy","Supportive networks"],"area":"WEALTH BASE"},{"name":"Financial Assets","desc":"Ownership that stores, grows or produces value.","examples":["Cash, stocks, bonds & funds","401(k)s, IRAs & 529 plans","Pensions & annuities","Cash-value insurance","Real estate","Businesses","Crypto & gold","Patents, copyrights, etc."],"enablers":["Account access & knowledge","Diversification & time","Low costs & taxes"],"area":"WEALTH BASE"},{"name":"Tangible Assets","desc":"Physical property you own, use or hold.","examples":["Home & other residences","Vehicles & equipment","Art, antiques & collectibles","Jewelry, metals & gems"],"enablers":["Capital & affordability","Ownership judgment","Maintenance & insurance"],"area":"WEALTH BASE"}],"stages":[{"name":"MIDDLE / HIGH SCHOOL (~13–18)","entries":[{"h":"START BUILDING GOOD WORK HABITS AND EXPERIENCE—in the classroom, volunteering, and at part-time jobs.","c":"Small jobs, chores, volunteering, and part-time work show what work feels like—and can help with college admissions and scholarships. The focus is learning to show up on time, follow instructions, complete simple tasks well, and work with adults and others.","do":["Try a variety of simple jobs—yard work, babysitting, volunteer projects, small gigs, or summer jobs.","Build your work ethic, reliability, and awareness of what work is like.","Practice showing up on time and following through.","Talk with adults about their jobs, training, and education.","Share insights and opportunities with friends who are also building experience.","Allocate some earnings to saving and investing."],"avoid":["Work or volunteering hours that hurt sleep or school performance.","Unsafe or unproductive work situations.","Mediocre enthusiasm or effort—start building your work habits and reputation now."]},{"h":"BE APPRECIATIVE OF ANY GIFTS AND HELP YOU RECEIVE—and make the most of it.","c":"Help is often from parents or other caregivers and focused on living and education. Gifts and allowances can teach budgeting, and family conversations about needs and wants begin to shape spending attitudes.","do":["Show gratitude for support received.","Use gifts and allowances to practice budgeting.","Save or invest part of gifts when possible."],"avoid":["Developing a sense of entitlement around gifts or aid.","Treating all gifts or aid as free money to spend frivolously."]},{"h":"AVOID DEBT BUT LEARN ABOUT IT—how debt works and what the dangers are.","c":"There is usually no real debt yet, but beliefs about borrowing are forming through parents, media, and peers. The goal is to understand why debt costs money, when it can be useful or harmful, and why living within your means matters.","do":["Learn how interest, fees, and repayment schedules work.","Compare examples with different interest rates and payment periods.","Understand why adults use mortgages, car loans, and student loans.","Learn about good and poor uses of debt.","Learn how credit cards, credit scores, and payment behavior are connected."],"avoid":["Using credit cards, payday loans, or similar tools without guidance.","Building habits around impulsive borrowing or unpaid bills."]},{"h":"START GETTING FAMILIAR WITH CHECKING, SAVING, AND INVESTMENT ACCOUNTS—these will be part of your financial life for a long time.","c":"Asset income is usually small; the focus is learning how deposits, balances, interest, and investment returns work. Seeing regular statements begins to create ownership of your finances and familiarity with how money can grow.","do":["Open a simple savings account and make regular contributions—even small ones.","If available, consider a parent-linked custodial brokerage account.","Consider a Roth IRA if you have earned income from a job.","Learn what bank and investment statements tell you.","Learn how interest and compounding returns work.","Save or invest part of gifts and earnings.","Take a personal-finance class at school or online."],"avoid":["Letting accounts sit without knowing what is happening.","Spending at a level that prevents saving or investing.","Using complex or risky investments or accounts."]},{"h":"LEARN WHAT COMES OUT OF A PAYCHECK—so you know how much you actually have to use.","c":"First jobs introduce withholding, payroll taxes, and sometimes benefit deductions; take-home pay is less than gross pay.","do":["Read every pay stub.","Learn gross pay, net pay, and withholding.","Complete tax forms and filings with help."],"avoid":["Planning spending from the gross-pay number.","Ignoring tax documents or deadlines."]},{"h":"LEARN WHAT DAILY LIFE REALLY COSTS—so you can make realistic choices about money.","c":"Family usually pays for housing, food, transportation, and healthcare while teens begin paying for selected personal needs.","do":["Compare prices and lower-cost alternatives.","Create and track a simple budget.","Learn what college or training, housing, transportation, and insurance cost.","Learn how the household budget works and contribute when expected."],"avoid":["Confusing needs with wants.","Taking family-provided resources for granted."]},{"h":"LOOK PAST THE PURCHASE PRICE—because owning something usually costs more over time.","c":"Phones, computers, bikes, sports gear, and sometimes cars bring repair, replacement, insurance, and maintenance costs.","do":["Estimate the full cost before buying.","Care for and secure what you own.","Save for repairs and replacement."],"avoid":["Buying solely because the upfront price fits.","Neglecting maintenance or protection."]},{"h":"KEEP PROMISES AND GIVE WITHIN YOUR MEANS—because trust matters more than the amount.","c":"Small debts to family or friends and first charitable or personal gifts create early lessons in responsibility.","do":["Track and repay anything you owe.","Give money or time intentionally.","Agree clearly when sharing costs."],"avoid":["Forgetting informal debts.","Giving or lending because of pressure."]},{"h":"ENJOY SOME MONEY WITHOUT LOSING CONTROL—so small choices do not crowd out bigger goals.","c":"Food out, clothing, games, entertainment, and subscriptions compete with short- and long-term goals.","do":["Set a spending limit before shopping.","Pause and compare alternatives.","Save toward larger wants."],"avoid":["Impulse or influencer-driven purchases.","Unnoticed subscriptions and spending every dollar."]},{"h":"SET ASIDE MONEY FIRST, EVEN IN SMALL AMOUNTS—because the habit matters more than the starting amount.","c":"This is the best time to build the habit through goal savings, an emergency cushion, and simple long-term investing.","do":["Save part of every gift and paycheck.","Separate near-term goals from long-term investing.","Use simple diversified investments with adult guidance."],"avoid":["Waiting until earnings feel large enough.","Risking money needed soon."]},{"h":"MAKE YOURSELF YOUR MOST IMPORTANT INVESTMENT—because your skills, health, and relationships shape future options.","c":"Education, health, motivation, reliability, interests, and relationships are developing faster than financial wealth.","do":["Focus on education; build communication, digital, and problem-solving skills.","Protect sleep, health, and reputation.","Develop mentors and supportive friendships."],"avoid":["Letting work or distractions crowd out school, health, or relationships.","Choices that damage trust or future options."]},{"h":"BUILD FAMILIARITY AND OWNERSHIP, NOT COMPLEXITY—because simple accounts are easier to understand and use well.","c":"Assets may include checking, savings, a custodial investment account, a 529 plan, or a small Roth IRA.","do":["Open a simple savings or custodial investment account; use a Roth IRA if you have earned income.","Know account purposes and balances; review statements with a trusted adult.","Favor simple, low-cost, diversified choices."],"avoid":["Complex or speculative investments.","Losing track of accounts, passwords, or ownership."]},{"h":"LEARN TO BUY, MAINTAIN, AND PROTECT PHYSICAL THINGS—because caring for what you own saves money and preserves value.","c":"Most owned property is personal-use equipment—electronics, sports gear, a bike, or perhaps a first vehicle.","do":["Compare buying new, used, shared, or rented.","Maintain and secure valuable items.","Understand insurance when needed."],"avoid":["Financing nonessential possessions.","Assuming collectibles will rise in value."]}]},{"name":"COLLEGE / EARLY ADULT (19–24)","entries":[{"h":"DOUBLE DOWN ON YOUR EDUCATION AND SKILLS—this is the easiest time to rapidly gain marketable knowledge and skills.","c":"Some pursue college while working part time or in internships; others enter trades, service work, apprenticeships, unions, or entry-level roles. Income is often modest, but experience is growing and the key is building skills, discipline, and a credible path forward.","do":["Seek roles that build transferable skills such as customer service, problem-solving, and technical skills.","Experiment with internships, apprenticeships, certifications, or small-business work.","Learn to read pay stubs, understand taxes, and compare compensation offers."],"avoid":["Staying too long in low-learning jobs with limited opportunity.","Assuming college is the only valid path—or that skipping college means low potential.","Relying entirely on loans or parents without building a work track record."]},{"h":"EXPLORE ALL SOURCES OF POTENTIAL AID—and be prepared to be accountable for using it responsibly.","c":"Family support, scholarships, grants, employer training, housing help, or 529 withdrawals may support education and independence. Help may also cover a first car, trade tools, or apartment deposits.","do":["Clarify what financial support is available and what it covers.","Use a budget for whatever support you receive.","Explore scholarships, grants, employer training, and other aid.","Regularly thank the people providing financial and other support."],"avoid":["Becoming dependent on ongoing aid.","Expecting support without communication or accountability.","Ignoring how family support must be shared among siblings or other needs."]},{"h":"BE VERY CAREFUL AND LISTEN TO TRUSTED ADVISORS—this is when detrimental habits and poor decisions can be felt for years.","c":"Student or training loans, first credit cards, auto loans, tools, certifications, and apartment obligations create real repayment responsibility. Handling them well builds credit and future borrowing power; over-borrowing can create years of problems.","do":["Consider the full cost of purchases, including maintenance and insurance.","Borrow only what you need—not the maximum available.","Learn how credit scores work and how to build them.","Use one low-limit credit card and pay it off each month.","Get help quickly if you fall behind—before debts compound."],"avoid":["Payday loans and high-fee lenders.","Maxing out credit cards or missing payments.","Letting unpaid interest get added to loan balances.","Borrowing instead of saving for purchases."]},{"h":"WADE INTO INVESTING—and develop habits that can translate into compounding growth and returns over time.","c":"This is often the first realistic chance to invest through a Roth IRA or workplace plan. The amounts may be small; the habit and learning matter most, especially when hot tips, crypto, and meme stocks can be tempting.","do":["Open a Roth IRA if you have earned income.","Use simple, low-cost, broadly diversified or target-date funds.","Contribute enough to a workplace plan to receive any employer match.","Learn about normal market ups and downs.","Learn from books, classes, and people aligned with your interests."],"avoid":["Concentrated bets in speculative assets or individual fads.","Frequent trading based on headlines or social media.","Ignoring fees and account minimums.","Advice from people who are not aligned with your well-being."]},{"h":"UNDERSTAND TAXES AND BENEFITS BEFORE CHOOSING WORK—because the highest pay is not always the best overall deal.","c":"Payroll withholding, self-employment taxes, health coverage, and retirement deductions begin affecting take-home pay.","do":["Review pay stubs and benefit choices.","Set aside taxes from gig or contract work.","Claim available education and work tax benefits."],"avoid":["Comparing jobs only by hourly wage or salary.","Spending money that should be reserved for taxes."]},{"h":"CONTROL THE CORE COSTS THAT CAN FORCE YOU INTO DEBT—because recurring budget gaps are hard to fix later.","c":"Tuition or training, rent, food, transportation, and healthcare dominate a tight and changing budget.","do":["Track spending for 60–90 days.","Use roommates, meal planning, and shared transportation.","Maintain appropriate health and renters coverage."],"avoid":["Using credit cards to fill recurring budget gaps.","Choosing housing or transportation you cannot sustain.","Paying for a meal plan and then routinely eating out anyway."]},{"h":"KEEP FIRST-TIME OWNERSHIP SIMPLE AND AFFORDABLE—because repairs, insurance, and replacement can strain a tight budget.","c":"A car, computer, phone, tools, and apartment furnishings bring insurance, upkeep, repairs, and replacement costs.","do":["Price the full ownership cost.","Buy reliable used items when sensible.","Maintain insurance and a small repair reserve."],"avoid":["Large car payments or constant technology upgrades.","Ignoring maintenance until something fails."]},{"h":"MEET YOUR OBLIGATIONS BEFORE TAKING ON OTHERS’—because helping should not undermine your own stability.","c":"Loan and credit payments begin while giving is usually modest and may be expressed through time rather than money.","do":["Automate required payments.","Help others in ways your budget can support.","Set clear terms for shared expenses."],"avoid":["Co-signing or lending money you cannot lose.","Giving to the point that you must borrow."]},{"h":"MAKE ROOM FOR FUN WITHOUT FINANCING IT—because debt can make short-lived experiences cost much more.","c":"Socializing, travel, dining, clothing, and subscriptions can quietly exceed the money available after essentials.","do":["Set weekly or monthly spending limits.","Choose lower-cost social options.","Cancel low-value recurring charges."],"avoid":["Letting wants or FOMO spending grow faster than earnings and drain savings.","Carrying balances for trips, dining, or entertainment."]},{"h":"ESTABLISH THE SYSTEM BEFORE YOUR INCOME GROWS—because early habits are easier to keep than start later.","c":"Starter emergency savings, a workplace plan, a Roth IRA, and near-term goal funds create the first durable financial base.","do":["Automate a contribution from every paycheck.","Build a starter emergency reserve.","Match account type and investment risk to each goal."],"avoid":["Waiting for a higher salary to begin.","Investing tuition, rent, or emergency money aggressively."]},{"h":"TURN EDUCATION AND EXPERIENCE INTO EMPLOYABLE VALUE—because credentials matter most when you can apply them.","c":"Credentials, practical skills, work habits, networks, health, and reputation begin shaping long-term opportunity.","do":["Invest in education, certifications, or trade tools—and learn to apply them.","Become outstanding at thinking, learning, and communicating through real work.","Develop mentors and professional relationships.","Protect health, reliability, and integrity."],"avoid":["Failing to make the most of education and training opportunities.","Underestimating relationships with peers, teachers, mentors, and advisors.","Taking on education debt without a clear value case."]},{"h":"BUILD A SIMPLE FOUNDATION YOU CAN KEEP FOR DECADES—because consistency and low costs can matter more than complexity.","c":"Checking, savings, a Roth IRA, a first employer plan, and perhaps a small brokerage account are common.","do":["Open and contribute to a Roth IRA when eligible.","Keep fees low and holdings diversified.","Know and manage balances, beneficiaries, statements, and logins."],"avoid":["Speculative positions that dominate the portfolio.","Scattered accounts and avoidable fees."]},{"h":"BUY FOR FUNCTION, FLEXIBILITY, AND LOW TOTAL COST—because your needs and location may change quickly.","c":"The main tangible assets are often a vehicle, tools, electronics, and household furnishings rather than real estate.","do":["Buy used or shared when practical.","Carry appropriate auto and renters insurance.","Maintain property and keep purchase records."],"avoid":["Overbuying a vehicle or furnishings for status.","Treating possessions as dependable investments."]}]},{"name":"EARLY CAREER (25–34)","entries":[{"h":"DO GREAT WORK AND LEARN FAST—this is when you set your foundation for a career, not just a job.","c":"This can be the steepest income-growth decade. People negotiate offers, move from jobs into careers, and begin treating healthcare, equity, and retirement contributions as part of total compensation. Mentors, feedback, and well-timed moves can compound for years.","do":["Learn to negotiate salary and benefits, and benchmark your role in the market.","Invest in technical, interpersonal, and leadership skills that increase your value.","Use performance reviews and feedback to make deliberate career moves."],"avoid":["Staying in stagnant roles out of comfort.","Letting lifestyle rise as fast as income, leaving no room to save and invest.","Ignoring retirement plans, insurance, equity, and other benefits."]},{"h":"PLAN ON SELF-SUPPORT AS MUCH AS POSSIBLE—and use any offered assistance responsibly.","c":"Most adults are becoming self-supporting but may receive targeted help for transitions such as a wedding, education, a car, childcare, or a home down payment. Occasional support should accelerate stability without creating dependence.","do":["Request targeted support only for a clear purpose.","Save for emergencies to reduce future reliance on others.","Communicate clearly and manage expectations with anyone providing aid."],"avoid":["Allowing support to replace adult responsibility.","Counting on assistance that may not arrive.","Treating assistance as an entitlement rather than a gift.","Hiding financial struggles from trusted family."]},{"h":"MANAGE DEBT AND CASH FLOW CAREFULLY—this is when debt missteps can set you back for years.","c":"Student loans, auto loans, rent, credit cards, and possibly a first mortgage compete for cash. A healthy debt-to-income ratio supports future flexibility; high-interest balances and oversized payments can block progress for years.","do":["Create a clear payoff strategy for student loans.","Make a saving and purchase plan for a home if desired.","Build a substantial emergency fund to avoid new debt during surprises.","Check that a home would remain affordable if income fell or major costs rose."],"avoid":["Taking on too much car debt and related insurance cost.","Using credit to support a lifestyle beyond income.","Keeping high-interest debt when lower-cost refinancing is available.","Missing payments or paying only the minimum."]},{"h":"GET SERIOUS ABOUT SAVING AND INVESTING—this is the decade where starting early pays off enormously.","c":"Consistent contributions begin to accumulate, while dividends and interest are still small. The decision to contribute 5%, 10%, or 15% of income usually matters far more than finding the perfect fund.","do":["Capture the full employer match in a workplace plan.","Use Roth and pre-tax accounts thoughtfully as income changes.","Set up automatic investing in retirement and, if possible, taxable accounts.","Increase contributions with each raise.","Choose a simple long-term investment mix you can maintain."],"avoid":["Stopping contributions during normal market volatility.","Keeping too much cash out of fear.","Constantly switching strategies based on short-term results."]},{"h":"USE BENEFITS AND TAX RULES TO KEEP MORE OF YOUR PAY—because unused benefits and poor choices can quietly reduce compensation.","c":"Taxes rise with earnings; retirement, health, disability, and childcare benefits become financially important.","do":["Review withholding and benefits annually.","Use retirement, health, and dependent-care advantages.","Protect income with suitable insurance."],"avoid":["Leaving employer matches or valuable benefits unused.","Being underinsured while others depend on your income."]},{"h":"KEEP FIXED COSTS LOW ENOUGH TO PRESERVE OPTIONS—because housing and car commitments are hard to unwind.","c":"Housing, transportation, healthcare, and possibly childcare consume much of rising income and can become hard to reverse.","do":["Control housing and vehicle commitments.","Maintain three to six months of core expenses.","Re-shop major services and insurance."],"avoid":["Upgrading every need as income grows.","Fixed costs that leave no room for emergencies or regular investing."]},{"h":"PLAN FOR THE REAL COST OF HOMES, CARS, AND EQUIPMENT—because upkeep and replacement can surprise an unprepared budget.","c":"Ownership expands, bringing maintenance, insurance, taxes, repairs, and replacement cycles that are easy to underestimate.","do":["Fund dedicated maintenance and replacement reserves.","Inspect assets carefully before purchase.","Review insurance limits and deductibles."],"avoid":["Deferring routine maintenance.","Owning more assets than time and cash can support."]},{"h":"FOLLOW A DEBT PLAN AND SET HEALTHY GIVING BOUNDARIES—because competing obligations can slow every goal.","c":"Loan repayment continues while support for family, friends, or charities often begins to grow.","do":["Prioritize costly debt and automate payments.","Set an annual giving amount.","Use written terms for family loans."],"avoid":["Co-signing without absorbing the full downside.","Giving from money needed for emergencies or retirement."]},{"h":"STOP LIFESTYLE CREEP BEFORE IT BECOMES FIXED—because higher spending can absorb every raise.","c":"Dining, travel, subscriptions, hobbies, and convenience spending can grow as fast as income.","do":["Direct raises to goals before spending expands.","Choose the few upgrades you value most.","Plan major purchases; judge affordability by money you can access, not only total net worth.","Review recurring charges several times a year."],"avoid":["Scaling spending to income—or using net worth or credit to justify overspending.","Letting peers define an appropriate lifestyle."]},{"h":"AUTOMATE SAVING ACROSS EMERGENCIES, RETIREMENT, AND GOALS—because each purpose needs money on a different schedule.","c":"Emergency funds and retirement accounts become substantial; home, family, and education goals require separate time horizons.","do":["Automate savings, retirement contributions, and required insurance payments; raise contributions over time.","Maintain an accessible emergency reserve.","Use separate accounts for separate goals; open a 529 when education is a goal."],"avoid":["Trying to time markets.","Putting every available dollar into a home."]},{"h":"BUILD CAREER VALUE WITHOUT SACRIFICING HEALTH—because long-term success requires both capability and staying power.","c":"Expertise, leadership, judgment, relationships, and credibility begin separating career paths and earnings.","do":["Deepen valuable skills and broaden business understanding.","Build relationships inside and outside your employer.","Protect sleep, fitness, and family connections."],"avoid":["Burnout disguised as ambition.","Allowing current success to stop learning."]},{"h":"CREATE A DIVERSIFIED BASE THAT CAN GROW FOR DECADES—because time works best when risk and costs stay under control.","c":"Retirement plans, emergency savings, taxable investments, insurance, and perhaps real estate or business ownership take shape.","do":["Use tax-advantaged accounts intelligently.","Diversify and keep investment costs low.","Add beneficiaries and basic estate documents."],"avoid":["Excess company stock or speculative concentration.","Duplicative, expensive, or poorly understood accounts."]},{"h":"BUY PHYSICAL ASSETS THAT SUPPORT LIFE, NOT CONTROL IT—because ownership should add value without taking away flexibility.","c":"A first home, vehicles, furnishings, tools, and business equipment can become large parts of the balance sheet.","do":["Test affordability beyond the purchase payment.","Maintain, insure, and document valuable property.","Consider resale value and flexibility."],"avoid":["Treating a primary home as guaranteed investment growth.","Collectibles or luxury purchases financed with debt."]}]},{"name":"BUILDING PHASE (35–44)","entries":[{"h":"TAKE ROLES THAT ADD MORE VALUE—this is a critical time for solidifying a reputation and an upward path.","c":"Many move into management, advanced professional roles, deep specialization, or entrepreneurship. Responsibilities grow while work, family, and caregiving compete for time; reputation, networks, and avoiding burnout become increasingly important.","do":["Build leadership and mentoring skills, and document accomplishments and impact.","Align work with your strengths so you can sustain energy over time.","Grow your network inside and outside your organization.","Check your market value by exploring outside opportunities periodically."],"avoid":["Coasting on old skills instead of updating them.","Staying in a toxic environment solely for pay.","Relying on only a few bosses or relationships.","Letting work crowd out health and family life."]},{"h":"CAREFULLY MANAGE SUPPORT FROM OTHERS—and the expectations that may come with it.","c":"Help may arrive for children, housing, emergencies, or caregiving, while support can also flow toward parents or other relatives. Clear expectations and communication help prevent resentment and dependence.","do":["Clarify whether support is a gift, loan, or shared cost.","Discuss expectations openly with family.","Use support to improve stability and plan for the possibility that it stops."],"avoid":["Building core spending around uncertain family help.","Allowing money to create unspoken obligations.","Failing to discuss support arrangements with your partner."]},{"h":"AVOID NEW EXPENSIVE DEBT—this is when life becomes more complex and demanding of cash and flexibility.","c":"Mortgages, childcare, education, vehicles, and family support can create the heaviest debt load. Bigger homes, second homes, expensive cars, and constant borrowing can slow saving and investing during crucial compounding years.","do":["Prioritize avoiding and reducing high-interest debt.","Right-size housing and transportation choices.","Track debt-to-income ratios and keep emergency reserves before adding obligations."],"avoid":["Large new loans without strong cash coverage and emergency planning.","Letting childcare or lifestyle inflation exceed income.","Using home equity for purchases or remodels without carefully considering the risks."]},{"h":"MANAGE YOUR INVESTMENTS MORE DELIBERATELY—this is when larger balances benefit from better planning.","c":"Higher contributions and market returns make dividends, interest, and gains noticeable. Portfolios can move by more than a paycheck or bonus, so diversification, rebalancing, taxes, and emotional discipline matter more.","do":["Adjust retirement contributions as income and obligations change.","Periodically rebalance to your intended investment mix.","Review whether investment risk still fits your goals, timing, and upcoming needs.","Coordinate retirement and taxable investing for taxes and diversification."],"avoid":["Overconcentrating in company stock or a single theme.","Reacting emotionally to market corrections.","Frequent taxable trading without considering taxes.","Holding investments in accounts that create unnecessary taxes."]},{"h":"COORDINATE TAXES, BENEFITS, AND INCOME PROTECTION—because more people and plans may now depend on your earnings.","c":"Higher earnings, childcare, dependent care, insurance, and business income make paycheck and tax decisions more consequential.","do":["Review withholding and benefit elections annually.","Use available tax-advantaged accounts.","Maintain disability and life protection where needed."],"avoid":["Tax surprises from bonuses or outside income.","Underinsuring income that supports a family."]},{"h":"BUILD A CUSHION FOR PEAK FAMILY COSTS—because high recurring expenses leave less room for surprises.","c":"Housing, childcare, schooling, food, transportation, and healthcare often make this the most demanding household-spending phase.","do":["Protect a strong emergency reserve.","Model major family costs several years ahead.","Control fixed housing and transportation commitments."],"avoid":["Assuming today’s high income is permanent or failing to plan for a few bad or unexpected events.","Allowing recurring costs to consume every raise."]},{"h":"FUND MAINTENANCE BEFORE LARGE ASSETS DETERIORATE—because small repairs are usually cheaper than major failures.","c":"Homes, vehicles, technology, and business equipment require regular upkeep, taxes, insurance, and eventual replacement.","do":["Create annual maintenance and replacement budgets.","Review property and liability coverage.","Address small repairs before they become large."],"avoid":["Deferring maintenance to preserve short-term cash.","Adding assets without capacity to care for them."]},{"h":"BALANCE REPAYMENT, FAMILY SUPPORT, AND GENEROSITY—because helping others should not derail your own security.","c":"Debt payments coexist with support for children, parents, siblings, schools, and charities.","do":["Set priorities for debt reduction and giving.","Agree on boundaries with extended family.","Document loans and recurring commitments."],"avoid":["Raiding retirement funds to support others.","Rescuing repeatedly without a sustainable plan."]},{"h":"CHOOSE THE FAMILY LIFESTYLE YOU CAN SUSTAIN—because today’s upgrades can become tomorrow’s fixed costs.","c":"Travel, activities, dining, home upgrades, and convenience services compete with education and retirement goals.","do":["Choose the few experiences the family values most.","Budget large trips and projects in advance.","Redirect unused spending to long-term goals."],"avoid":["Matching peer lifestyles.","Turning optional upgrades into permanent fixed costs."]},{"h":"GROW EVERY MAJOR GOAL WITHOUT NEGLECTING RETIREMENT—because you cannot borrow later for retirement.","c":"Retirement, education, emergency, home, and taxable investments all need funding from the same household margin.","do":["Increase retirement saving as income grows.","Fund 529 or other education savings without sacrificing retirement security.","Grow flexible taxable investments and maintain emergency cash."],"avoid":["Overfunding one goal while ignoring others.","Stopping investing during expensive family years."]},{"h":"TURN EXPERIENCE INTO LEADERSHIP AND ADAPTABILITY—because future opportunities depend on both judgment and continued learning.","c":"Expertise, judgment, networks, family relationships, and health drive both current performance and future options.","do":["Develop successors and mentoring skills.","Keep credentials and technology skills current.","Protect health and close relationships."],"avoid":["Letting responsibilities crowd out all renewal.","Assuming past success guarantees future relevance."]},{"h":"BUILD A COORDINATED, TAX-AWARE FINANCIAL BASE—because scattered accounts and decisions can create cost and confusion.","c":"Retirement, taxable, education, cash, insurance, real estate, and business interests may now span several institutions.","do":["Coordinate allocation across all accounts.","Diversify, rebalance, and manage taxes and fees.","Update beneficiaries and estate documents."],"avoid":["Skipping insurance or estate basics.","Untracked accounts, overlapping investments, or concentrated employer, business, or property risk."]},{"h":"MAKE EACH PHYSICAL ASSET EARN ITS PLACE—because every asset uses money, time, and attention.","c":"A primary home, vehicles, equipment, and perhaps a second property or collectibles consume significant capital and time.","do":["Assess utility, cash flow, and total ownership cost.","Maintain records, insurance, and preventive care.","Sell assets that no longer serve the family."],"avoid":["Overleveraging for a larger lifestyle.","Assuming sentimental value equals market value."]}]},{"name":"GROWTH & STABILITY (45–54)","entries":[{"h":"FOCUS ON JOB PERFORMANCE AND SECURITY—this is when earnings can be their highest and job loss matters most.","c":"Earnings may peak in senior, expert, or business-owner roles, while health and caregiving demands can also rise. Staying current, healthy, connected, and alert to changes protects both income and future options.","do":["Manage sleep, exercise, energy, and work boundaries.","Keep skills current with technology and industry shifts.","Maintain relationships that improve security and open new opportunities.","Consider role, company, or business changes before a forced move becomes more likely."],"avoid":["Assuming tenure or title makes your role secure.","Ignoring health and stress warning signs.","Taking professional relationships for granted.","Identifying so strongly with one job that you stop scanning for threats and opportunities."]},{"h":"TREAT INCOMING SUPPORT AS OPTIONAL, NOT REQUIRED.","c":"Inheritance, family cost-sharing, employer benefits, or public programs may help with children, aging parents, health, or a work transition. Timing and amounts are often uncertain.","do":["Clarify legal, tax, and family expectations.","Integrate any windfall into the full plan before spending it.","Keep a plan that still works if promised help never arrives."],"avoid":["Spending against an expected inheritance.","Allowing aid to create unresolved family conflict."]},{"h":"BEGIN TO REDUCE DEBT EXPOSURE—this is when debt decisions can broaden or narrow your retirement options.","c":"People often begin eliminating non-mortgage debt while college costs, parent support, and requests for family loans add pressure. Lower liabilities improve flexibility and the ability to handle downturns or unexpected events.","do":["Accelerate repayment of high-interest or lingering debts.","Carefully consider whether to co-sign loans for children.","Evaluate whether earlier mortgage payoff makes sense for your situation."],"avoid":["Taking on large new debts close to retirement.","Co-signing without clear repayment expectations and full downside planning.","Draining retirement accounts to pay for college.","Making commitments that may become hard to honor."]},{"h":"BEGIN TO SHIFT INVESTMENT STRATEGIES—this is when good decisions can set you up for a better retirement.","c":"For many, annual portfolio gains or losses are now larger than new contributions. Investment mix, account types, taxes, and future cash needs matter more, while college, housing, and caregiving can tempt people to raid retirement assets.","do":["Clarify how much investment risk you are willing and able to take.","Begin a plan for retirement spending and income sources.","Coordinate what you hold in taxable, Roth, and pre-tax accounts.","Consider longer-term tax moves such as deferred compensation or Roth conversions."],"avoid":["Making large investment changes in reaction to headlines.","Taking excessive risk to catch up.","Overconcentrating by company, asset type, sector, or region.","Avoiding conversations with a spouse or trusted experts."]},{"h":"USE TAX BREAKS AND BENEFITS WHILE EARNINGS ARE HIGH—because this may be your best chance to build future flexibility.","c":"Income taxes, healthcare, disability protection, and dependent-care costs can be high even as retirement opportunities expand.","do":["Maximize suitable workplace and health benefits.","Review tax strategy and withholding.","Use age-based catch-up contributions when eligible."],"avoid":["Ignoring taxes when bonuses or equity pay arrives.","Dropping income protection too early."]},{"h":"KEEP THE HOUSEHOLD BASELINE FROM RISING WITH PEAK PAY—because high fixed costs can become a burden when earnings fall.","c":"Housing, healthcare, transportation, teenage children, college, and aging-parent needs keep essential spending elevated.","do":["Separate core costs from temporary family costs; set realistic budgets for college and teen activities.","Plan healthcare and caregiving needs; keep an extra cushion for hard-to-predict family costs.","Re-shop insurance and major services."],"avoid":["Letting peak income set a permanent cost base.","Ignoring the likely end of employer income.","Overspending on teen activities or college."]},{"h":"PREPARE FOR MAJOR REPAIRS AND REPLACEMENT CYCLES—because homes, vehicles, and equipment often age at the same time.","c":"Homes, vehicles, and equipment age together; second homes, boats, or other assets may add meaningful carrying costs.","do":["Build multi-year repair and replacement reserves.","Revisit auto, liability, property, and health coverage as teens drive and attend college.","Evaluate whether every asset is still worth its cost."],"avoid":["Deferring maintenance into retirement.","Large unplanned home projects that reduce flexibility.","Underestimating taxes, insurance, or storage."]},{"h":"SUPPORT OTHERS WITHOUT SACRIFICING YOUR OWN SECURITY—because your remaining working years are becoming limited.","c":"Debt payments can overlap with college support, aging-parent needs, family loans, and growing charitable giving.","do":["Set written limits for family support.","Prioritize retirement before optional gifts.","Formalize loans and charitable plans."],"avoid":["Using retirement accounts to solve others' problems.","Open-ended commitments or sibling ambiguity."]},{"h":"ENJOY PEAK-INCOME YEARS WITHOUT LOCKING IN PEAK SPENDING—because today’s lifestyle must still fit after work income ends.","c":"Travel, dining, hobbies, convenience services, and home upgrades can expand quickly as family obligations shift.","do":["Fund travel, experiences, and projects intentionally.","Identify spending that can fall in retirement.","Redirect part of raises and windfalls to goals."],"avoid":["Permanent upgrades based on temporary income.","Spending to signal success."]},{"h":"ACCELERATE SAVING WHILE KEEPING INVESTMENTS DIVERSIFIED—because there is less time to recover from a large mistake.","c":"Retirement accumulation becomes urgent; college and family needs compete with a shrinking number of working years.","do":["Increase retirement and taxable investing.","Set college funding limits; pursue scholarships, grants, work-study, and other outside help.","Build cash for near-term transitions and rebalance across goals."],"avoid":["Funding college at the expense of retirement.","Concentrated bets intended to close a savings gap."]},{"h":"PROTECT HEALTH, RELEVANCE, AND RELATIONSHIPS—because each one affects how long and how well you can keep working.","c":"Experience and judgment are valuable, but skills can age and health or caregiving demands can constrain choices.","do":["Refresh technical and leadership skills.","Maintain broad professional relationships.","Invest seriously in physical and mental health."],"avoid":["Burnout and unmanaged chronic health issues.","Letting title or employer define your identity."]},{"h":"TURN A LARGE ASSET BASE INTO A CLEAR RETIREMENT PLAN—because many accounts must eventually support one spending plan.","c":"Retirement, taxable, cash, pension, insurance, real estate, and business interests may now represent substantial net worth.","do":["Measure allocation, fees, taxes, and concentration.","Update estate documents and beneficiaries.","Model retirement income, withdrawals, and downside scenarios."],"avoid":["Large speculative or concentrated positions.","Ignoring diversification, fees, taxes, or major allocation shifts.","Unnecessary complexity and high-fee products."]},{"h":"DECIDE WHICH PHYSICAL ASSETS BELONG IN YOUR FUTURE LIFE—because costly or unused property can reduce retirement flexibility.","c":"Homes, vehicles, recreational property, equipment, art, and collectibles may be valuable but costly and illiquid.","do":["Assess long-term use, accessibility, and carrying cost.","Maintain and insure valuable property.","Begin documenting ownership and intended disposition."],"avoid":["Adding illiquid assets just before retirement planning.","Holding unused property solely from inertia."]}]},{"name":"PRE-RETIREMENT (55–64)","entries":[{"h":"PLAN THE LATE STAGES OF YOUR CAREER—this is when roles can shift again and life after full-time work becomes more visible.","c":"Income may plateau or decline, while layoff or early-retirement offers become more possible. This can be a good time to negotiate flexibility, prepare successors, and consider part-time, advisory, consulting, or business-transition paths.","do":["Assess whether your work is sustainable and desirable for another five to ten years.","Understand how your employer handles people approaching retirement, and explore phased or part-time paths.","Use current credibility and relationships to build options for the next phase.","If you own a business, document knowledge, build successors, and consider whether to sell or keep it.","Include your spouse or family in the planning."],"avoid":["Leaving without a financial and psychological plan.","Letting skills, work relationships, health, or family connections deteriorate.","Working longer than fits your needs, wants, and next-stage goals."]},{"h":"INTEGRATE WINDFALLS OR SUPPORT WITHOUT RELYING ON THEM.","c":"Inheritance, employer transition benefits, family cost-sharing, or public programs may affect retirement readiness, but the timing, taxes, and restrictions may be uncertain.","do":["Verify timing, taxes, restrictions, and ownership.","Use support to strengthen rather than inflate the retirement plan.","Keep a strategy that works without uncertain aid."],"avoid":["Retiring based on an expected inheritance.","Making permanent commitments from one-time support."]},{"h":"OPTIMIZE DEBT EXPOSURE FOR RETIREMENT—balance debt with liquidity, security, and simplicity.","c":"Reducing or eliminating debt often becomes a priority, but mortgage payoff, downsizing, and refinancing should be considered alongside cash reserves. Less debt can reduce required retirement income and stress.","do":["Map out a debt-free—or low, inexpensive-debt—retirement timeline.","Consider downsizing or restructuring home loans.","Maintain cash reserves so repayment does not create new borrowing needs."],"avoid":["Entering retirement with high-interest or unsecured debt.","Taking on long-term loans late in life.","Paying off a low-rate mortgage if it would deplete needed savings or reserves."]},{"h":"BEGIN TO OPTIMIZE INVESTMENTS FOR RETIREMENT—this is when risk and tax planning become crucial.","c":"Asset income may be substantial, while a downturn just before or after retirement can matter more. Investment mix, taxes, fees, pensions, and the timing of retirement spending now affect lifetime after-tax income.","do":["Coordinate your investment mix with retirement timing and spending needs.","Explore tax strategies such as Roth conversions.","Reduce unnecessary advisor and fund expenses.","Learn pension amounts, timing, and annuity-versus-lump-sum choices.","Consider having a trusted advisor review the plan and its costs."],"avoid":["Risky tactics or emotional reactions aimed at higher returns right before retirement.","Reducing growth investments too early.","Waiting until retirement to begin tax planning.","Investments that unnecessarily reduce liquidity or flexibility."]},{"h":"USE FINAL WORKING YEARS TO MANAGE TAXES AND BENEFITS—because decisions now can affect retirement income and healthcare for years.","c":"High marginal taxes, catch-up contributions, deferred pay, insurance, and the transition toward Medicare require coordination.","do":["Review withholding and deferred compensation.","Use suitable catch-up and pre-tax opportunities.","Compare health and Medicare options before 65; plan the coverage transition."],"avoid":["Surprise taxes from bonuses or retirement elections.","Dropping needed coverage before a replacement begins."]},{"h":"DEFINE THE RETIREMENT BASELINE BEFORE LEAVING WORK—because core spending must remain affordable without a salary.","c":"Housing, food, transportation, healthcare, and family obligations must be supportable without a salary.","do":["Build a realistic retirement core budget.","Stress-test healthcare and long-term inflation.","Reduce fixed costs that no longer add value."],"avoid":["Assuming all spending will automatically fall.","Underestimating pre-Medicare and care costs.","Delaying needed medical care."]},{"h":"PREPARE ASSETS FOR RETIREMENT USE OR LET THEM GO—because upkeep becomes harder to fund and manage after work ends.","c":"Homes, vehicles, second properties, boats, and equipment may need upgrades, major repairs, or simplification.","do":["Complete priority maintenance before retiring.","Budget taxes, repairs, replacement, and insurance; review life, property, umbrella, and long-term-care coverage.","Sell assets that will not fit retirement life."],"avoid":["Deferring known repairs into fixed-income years.","Keeping costly assets without a clear purpose.","Underinsuring important assets."]},{"h":"FORMALIZE PAYOFF AND GIVING PLANS BEFORE RETIREMENT—because open-ended obligations can reduce retirement flexibility.","c":"Final debt reduction overlaps with weddings, home help, education, charity, and support for adult children or parents.","do":["Set annual and lifetime giving limits.","Coordinate gifts with retirement and estate plans.","Document family loans and expectations."],"avoid":["Large gifts that weaken retirement resilience.","Co-signing or rescuing without clear boundaries."]},{"h":"TEST THE RETIREMENT LIFESTYLE BEFORE COMMITTING TO IT—because planned spending may feel different without a paycheck.","c":"Travel, home projects, hobbies, and major purchases often rise as retirement approaches and time becomes more flexible.","do":["Practice living on the planned retirement budget.","Fund big trips and retirement-home projects separately.","Decide which recurring costs should end."],"avoid":["Major upgrades without lifetime-cost analysis.","Assuming peak discretionary spending can continue forever."]},{"h":"SAVE AGGRESSIVELY AND BUILD CASH FOR THE TRANSITION—because you may need to cover the gap before pensions or Social Security begin.","c":"Saving remains important while cash reserves, asset allocation, and timing to pensions or Social Security become equally important.","do":["Use final high-income years to save aggressively.","Build near-term spending reserves.","Match investments to withdrawal timing."],"avoid":["De-risking so much that long-term growth disappears.","Taking extra risk to repair late savings gaps."]},{"h":"PREPARE YOUR HEALTH, IDENTITY, AND RELATIONSHIPS FOR RETIREMENT—because a successful transition is about more than money.","c":"Professional identity may recede while health, purpose, family, friendships, and skills for optional work become more important.","do":["Strengthen health routines and social networks.","Define meaningful uses of time.","Retain skills and relationships for flexible work."],"avoid":["Planning finances while ignoring the life transition.","Postponing health or relationship priorities."]},{"h":"SIMPLIFY AND CONNECT ASSETS TO WITHDRAWAL AND ESTATE PLANS—because scattered decisions can create taxes, gaps, and confusion.","c":"Net worth may peak; retirement accounts, taxable assets, pensions, cash, insurance, and estate structures must work together.","do":["Review investment costs and consolidate unnecessary accounts.","Model withdrawals, taxes, and required distributions.","Update beneficiaries, wills, trusts, and estate plans."],"avoid":["High fees, duplicated holdings, and scattered accounts.","Ignoring required distributions, taxes, or estate-plan updates."]},{"h":"ALIGN PHYSICAL PROPERTY WITH THE LIFE YOU ACTUALLY WANT—because expensive, hard-to-sell assets can limit retirement choices.","c":"Retirement housing, second homes, vehicles, boats, art, and valuables may support goals—or reduce liquidity and flexibility.","do":["Assess accessibility, use, upkeep, and resale.","Document valuable property and ownership.","Right-size before a forced decision."],"avoid":["Over-upgrading the retirement home.","Entering retirement with excessive illiquid property."]}]},{"name":"EARLY RETIREMENT (65–74)","entries":[{"h":"TRANSITION TO WHAT’S NEXT—be thoughtful about balancing work with your other priorities.","c":"Many fully retire; others work part time or consult. Ideally, work becomes flexible and chosen, supporting purpose, identity, and connection without crowding out travel, family, hobbies, health, or volunteering.","do":["Consider carefully whether you want to keep working in some capacity.","Choose work that is energizing, low-stress, and flexible.","Revisit how work fits with health, relationships, and bucket-list priorities.","Make the most of the physical capabilities you have now."],"avoid":["High-stress or rigid roles taken from habit or fear.","Working only to avoid making retirement decisions.","Underpricing your experience in consulting or part-time work."]},{"h":"USE AVAILABLE SUPPORT TO PRESERVE INDEPENDENCE AND CHOICE.","c":"Inheritance, public benefits, community programs, family help, or caregiver support may supplement pensions, Social Security, and savings.","do":["Claim benefits and assistance for which you qualify.","Clarify expectations when family provides help.","Coordinate support with the full retirement-income plan."],"avoid":["Avoiding useful programs out of pride.","Letting informal help create confusion or dependence."]},{"h":"BE THOUGHTFUL AND STRATEGIC WITH DEBT—losing a work paycheck can change how debt affects you.","c":"New borrowing usually slows. The goal is predictable expenses, stable withdrawals, and a cushion for surprises, while any remaining mortgage is weighed against liquidity and other needs.","do":["Reduce monthly obligations where practical.","Re-evaluate whether paying off a remaining mortgage makes sense.","Reserve new borrowing for situations with a clear purpose and repayment plan.","Use low-cost debt strategically only when it improves the overall plan."],"avoid":["Large purchases without clear ability to pay through bad financial periods.","Debt that substantially reduces flexibility or liquidity for a long time.","Credit-card and other high-interest balances.","Family loans or co-signing without considering the full risks."]},{"h":"SHIFT TO LIVING OFF YOUR ASSETS—this is when work paychecks typically stop or decrease and withdrawals begin.","c":"Investments, Social Security, pensions, annuities, business interests, royalties, and deferred compensation may now fund spending. The order and size of withdrawals—and willingness to adjust spending—can strongly affect sustainability.","do":["Design a withdrawal strategy that considers taxes and required distributions.","Set rules for adjusting spending if investments underperform.","Keep money needed soon out of major market risk.","Include ongoing income from businesses and intellectual property.","Have a trusted advisor check important assumptions if useful."],"avoid":["Withdrawals that do not adjust when the portfolio changes.","Risking money needed for near-term spending.","Leaving excessive cash uninvested out of fear.","Ignoring taxes on large withdrawals.","New investments that unnecessarily limit access to your money."]},{"h":"MANAGE THE COSTS OF ANY CONTINUING WORK—because taxes and benefits determine what the work is really worth.","c":"Earned income may be small, but payroll or self-employment taxes and workplace benefits can interact with retirement coverage.","do":["Set aside taxes on consulting or part-time work.","Coordinate employer coverage with Medicare.","Judge work by net income and life value."],"avoid":["Treating gross consulting revenue as spendable.","Keeping costly work solely for weak benefits."]},{"h":"FUND A RELIABLE BASELINE AND PLAN FOR HEALTHCARE GROWTH—because essential costs must remain affordable through a long retirement.","c":"Housing, food, transportation, Medicare-related costs, and home or personal care form the essential retirement budget.","do":["Maintain a stable core-spending plan.","Use preventive care and appropriate coverage.","Plan for rising assistance and care needs."],"avoid":["Underestimating healthcare and long-term care.","Letting housing costs crowd out the rest of life."]},{"h":"SIMPLIFY OWNERSHIP AND KEEP IMPORTANT ASSETS PROTECTED—because maintenance burdens can grow as time and energy change.","c":"Homes, vehicles, second properties, and valuables continue to require maintenance, insurance, taxes, and management attention.","do":["Budget predictable upkeep and replacements.","Update insurance and property records.","Sell or simplify assets that create more burden than value."],"avoid":["Deferred maintenance or lapsed coverage.","Keeping unused assets solely from habit."]},{"h":"FIT DEBT PAYMENTS AND GENEROSITY INSIDE THE WITHDRAWAL PLAN—because both reduce the money available for future years.","c":"Existing mortgages may continue while gifts to family and charities become more meaningful and sometimes larger.","do":["Set a sustainable annual giving budget.","Coordinate gifts with taxes and estate goals.","Use written terms for family loans."],"avoid":["Open-ended support that damages retirement security.","Co-signing or rescuing from portfolio assets."]},{"h":"ENJOY THE ACTIVE YEARS WITH CLEAR SPENDING LIMITS—because early-retirement spending can affect the decades that follow.","c":"Travel, hobbies, dining, and home projects may peak early in retirement before activity and spending naturally soften.","do":["Set activity and spending priorities with your spouse or family; front-load time-sensitive experiences.","Set flexible annual spending ranges.","Adjust discretionary spending when markets disappoint."],"avoid":["Overspending early without recovery rules.","Spending from old habits instead of current priorities.","Underspending from fear when the plan is strong."]},{"h":"KEEP INVESTING WHILE FUNDING WITHDRAWALS AND RESERVES—because retirement may last long enough to require continued growth.","c":"Saving changes from pure accumulation to maintaining cash, reinvesting selected income, and preserving growth for a long retirement.","do":["Maintain near-term reserves.","Keep long-term money invested for growth.","Rebalance and replenish spending buckets deliberately."],"avoid":["Moving everything to cash.","Taking excessive risk to maximize income."]},{"h":"INVEST IN HEALTH, PURPOSE, AND CONNECTION—because these often determine the quality of retirement more than money alone.","c":"Time, experience, relationships, physical capacity, and mental engagement become central resources for a satisfying retirement.","do":["Maintain fitness, learning, and daily structure.","Strengthen family, friendship, and community ties.","Use experience through mentoring or service."],"avoid":["Isolation and loss of routine.","Postponing activities that depend on current health."]},{"h":"BALANCE GROWTH, CASH ACCESS, INCOME, AND SIMPLICITY—because the portfolio must support both today and many future years.","c":"Portfolios support withdrawals while pensions, annuities, and Social Security reduce—but do not eliminate—market and longevity risk.","do":["Simplify holdings and account management.","Stress-test cash flow, withdrawals, and taxes.","Plan for longevity using your portfolio, Social Security, pensions, or annuities.","Keep beneficiaries and estate plans current."],"avoid":["Complex products you cannot explain.","Ignoring taxes in distribution planning.","Ignoring fraud, fees, or account access for a spouse."]},{"h":"MAKE PROPERTY FIT YOUR RETIREMENT LIFE AND ABILITIES—because unused or difficult assets can become expensive burdens.","c":"Homes, vehicles, vacation property, boats, art, and collectibles may carry both emotional value and growing management burden.","do":["Assess accessibility, maintenance, and frequency of use.","Downsize or adapt before urgency forces the choice.","Document and insure valuable items."],"avoid":["Tying up too much liquidity in rarely used property.","Delaying safety or accessibility improvements."]}]},{"name":"LATER RETIREMENT (75+)","entries":[{"h":"USE YOUR TIME FOR THE THINGS THAT MATTER MOST TO YOU.","c":"Most people have stopped working for pay. Time is often centered on health, relationships, legacy projects, and independence, while light advising, storytelling, or occasional paid work may still provide purpose.","do":["Maintain a schedule that gives daily rhythm.","Stay socially connected and mentally engaged.","Share experience and stories with younger generations.","Revisit goals for travel and experiences.","Periodically decide whether small, enjoyable work still fits.","Maintain as much physical activity as you can."],"avoid":["Commitments that create stress or rigid obligations.","Working to make up for other people’s financial mistakes or dependence.","Ignoring cognitive or physical limits when accepting tasks.","Letting important social connections fade."]},{"h":"ACCEPT HELP THAT SUPPORTS SAFETY, DIGNITY, AND INDEPENDENCE.","c":"Family caregiving, public benefits, community services, inheritance, or housing support may become more important as health and living needs change.","do":["Identify programs and people who can help before a crisis.","Clarify responsibilities and decision authority.","Document support arrangements and keep family informed."],"avoid":["Refusing beneficial help until options become limited.","Depending on one caregiver without a backup."]},{"h":"SIMPLIFY, REMOVE, AND AVOID DEBT—this is when debt can add unwanted complexity and stress.","c":"Debt can create anxiety and administrative burden, especially if others begin helping with finances. Borrowing for medical, housing, or care needs should be deliberate and connected to the full care and estate plan.","do":["Keep obligations simple and easy to manage.","Maintain liquidity for healthcare and home needs.","Review all debt annually with trusted family or advisors."],"avoid":["New loans without careful evaluation.","Impulsive lending or co-signing for younger generations.","Cash-out refinancing, home-equity loans, or reverse mortgages without comparing risks and alternatives.","Complex borrowing arrangements that others cannot easily understand."]},{"h":"SIMPLIFY AND CLARIFY ASSET MANAGEMENT—trusted people can make income management easier and less stressful.","c":"Assets support stability, caregiving, and legacy. Some growth may still be needed for inflation and healthcare, while account management may begin shifting to a spouse, adult child, or advisor.","do":["Simplify accounts, holdings, and logins.","Ensure trusted people know how to help with bills, finances, and care.","Match investment choices to realistic health and longevity needs.","If useful, explore careful ways to access money tied up in real estate."],"avoid":["Investment strategies you cannot easily explain or monitor.","High-risk products marketed specifically to seniors.","Outdated beneficiaries or estate documents."]},{"h":"KEEP THE COSTS OF ANY EARNED INCOME SIMPLE—because modest work should not create unnecessary tax or recordkeeping burdens.","c":"Most have little work income; occasional consulting may still create taxes, recordkeeping, and benefit interactions.","do":["Use straightforward work and payment arrangements.","Withhold or reserve any taxes due.","Let a trusted person review unfamiliar agreements."],"avoid":["Complex business obligations for modest income.","Missing tax filings or payment deadlines."]},{"h":"SPEND TO SUPPORT HEALTH, SAFETY, COMFORT, AND INDEPENDENCE—because preserving quality of life is a primary purpose of wealth.","c":"Healthcare, medication, caregiving, accessible housing, food, and transportation increasingly shape the essential budget.","do":["Plan and pay for appropriate care.","Modify housing before safety deteriorates.","Use services that preserve energy and independence."],"avoid":["Unsafe isolation or delayed medical care.","Avoiding beneficial spending from fear."]},{"h":"GET HELP WITH UPKEEP AND PREVENT MISSED OBLIGATIONS—because missed payments or maintenance can quickly become costly.","c":"Property taxes, insurance, repairs, registrations, investment fees, and household maintenance can become harder to manage.","do":["Automate predictable payments.","Assign trusted help for maintenance and records.","Review whether each asset remains worth its cost."],"avoid":["Lapsed insurance, taxes, or registrations.","Keeping burdensome assets without a plan."]},{"h":"KEEP OBLIGATIONS LOW AND GIFTS WITHIN WHAT YOU CAN AFFORD—because future care and living needs must come first.","c":"Debt should be limited; family and charitable giving may continue as part of legacy and estate planning.","do":["Coordinate gifts with care and longevity reserves.","Communicate intentions and use documented processes.","Review recurring support annually."],"avoid":["Co-signing, impulsive loans, or financial rescue.","Gifts created by pressure, fraud, or confusion."]},{"h":"SPEND CONFIDENTLY ON WHAT MAKES LIFE EASIER AND MORE MEANINGFUL—because careful spending should support life, not only preserve assets.","c":"Travel may decline while family time, hobbies, comfort, convenience, and paid assistance become more valuable.","do":["Prioritize connection, enjoyment, and ease.","Simplify subscriptions and recurring commitments.","Consult trusted people before large purchases."],"avoid":["Fear-based underspending.","Scams, pressure sales, and unnecessary services."]},{"h":"PRESERVE CASH ACCESS, INFLATION PROTECTION, AND A CLEAR LEGACY—because money must cover both unexpected care and future wishes.","c":"New saving is limited; portfolio management focuses on reliable cash, suitable growth, care reserves, and intended transfers.","do":["Keep accessible reserves—or suitable insurance—for care and surprises.","Maintain an understandable investment mix.","Align withdrawals and gifts with longevity needs."],"avoid":["Chasing yield or locking money into illiquid products.","Holding excessive idle cash from fear."]},{"h":"PROTECT HEALTH, CONNECTION, AND DECISION SUPPORT—because trusted help and strong relationships preserve independence.","c":"Health, mobility, judgment, relationships, life experience, and trusted helpers determine autonomy and quality of life.","do":["Stay physically, socially, and mentally engaged.","Share knowledge, stories, and wishes.","Designate trusted financial and healthcare helpers."],"avoid":["Isolation and loss of routine.","Waiting for a crisis to establish support."]},{"h":"KEEP FINANCES CLEAR, STABLE, AND EASY TO MANAGE—because trusted people may need to step in and help.","c":"Financial assets fund care and legacy; management may transition to a spouse, adult child, trustee, or advisor.","do":["Simplify accounts, holdings, and logins.","Update beneficiaries, powers, wills, and trusts.","Document and transfer business ownership and intellectual property.","Ensure trusted people can locate and manage assets."],"avoid":["Outdated documents, hidden accounts, ignored paperwork, or tax surprises.","Complex, risky, or fraud-prone products."]},{"h":"MANAGE PHYSICAL PROPERTY FOR USE, SAFETY, AND TRANSFER—because clear plans reduce burden and conflict later.","c":"The home, vehicles, jewelry, art, collectibles, and sentimental items may need adaptation, sale, or organized transfer.","do":["Inventory art, jewelry, collectibles, and other valuable or meaningful property.","Adapt, maintain, insure, sell, or transfer deliberately—including assets heirs do not want.","Document ownership and intended recipients."],"avoid":["Property that no longer supports safe living.","Unclear ownership or last-minute disposition decisions."]}]}]};
+
+var AREAS = [
+  {id:"src", name:"Money Sources", desc:"How you create or obtain money and benefits"},
+  {id:"use", name:"Money Uses", desc:"How you spend, pay, give, save and invest money"},
+  {id:"base", name:"Wealth Base", desc:"What you build, own and harvest"}
+];
+var AREA_KEY = {"MONEY SOURCES":"src","MONEY USES":"use","WEALTH BASE":"base"};
+DATA.keyparts.forEach(function(kp,i){ kp.aid = AREA_KEY[kp.area]; kp.idx = i; });
+function kpsOf(aid){ return DATA.keyparts.filter(function(k){return k.aid===aid;}); }
+
+var STAGES = DATA.stages.map(function(s){
+  var m = s.name.match(/^(.*?)\s*\((.*)\)$/);
+  return {full:s.name, label:m?m[1]:s.name, age:m?m[2]:"", entries:s.entries};
+});
+
+/* ================= STORAGE ================= */
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+var FLAG_KEY="pwm.flags.v1", STAGE_KEY="pwm.stage.v1", A2HS_KEY="pwm.a2hs.dismissed.v1";
+var flags = {};
+try{ flags = JSON.parse(lsGet(FLAG_KEY)||"{}")||{}; }catch(e){ flags={}; }
+function saveFlags(){ lsSet(FLAG_KEY, JSON.stringify(flags)); updateFlagCnt(); }
+function cycleFlag(id){
+  var cur = flags[id]||0; var nxt=(cur+1)%3;
+  if(nxt===0) delete flags[id]; else flags[id]=nxt;
+  saveFlags(); return nxt;
+}
+function flagClass(v){ return v===1?"imp":(v===2?"pri":""); }
+function updateFlagCnt(){ document.getElementById("flagCnt").textContent = Object.keys(flags).length; }
+
+/* ================= STATE ================= */
+var curStage = 0;
+var st = parseInt(lsGet(STAGE_KEY),10);
+if(!isNaN(st) && st>=0 && st<STAGES.length) curStage = st;
+var path = []; // [] = home; ["src"] = area; ["src",kpIdx] = key part
+var pendingPulse = null;
+
+/* ================= FLAG IDs & TRAILS ================= */
+function kpFlagId(kp){ return "kp:"+kp.idx; }
+function itemFlagId(kp,list,i){ return "it:"+kp.idx+":"+list+":"+i; }
+function flagInfo(id){
+  var m;
+  if((m=id.match(/^kp:(\d+)$/))){
+    var kp=DATA.keyparts[+m[1]];
+    return {title:kp.name, trail:areaName(kp.aid)};
+  }
+  if((m=id.match(/^it:(\d+):(ex|en):(\d+)$/))){
+    var kp2=DATA.keyparts[+m[1]];
+    var list = m[2]==="ex"?kp2.examples:kp2.enablers;
+    var lbl = m[2]==="ex"?"Examples / Scope":"Strengthening Skills / Resources";
+    return {title:list[+m[3]], trail:areaName(kp2.aid)+" › "+kp2.name+" › "+lbl};
+  }
+  if((m=id.match(/^st:(\d+):(\d+):(do|av):(\d+)$/))){
+    var stg=STAGES[+m[1]]; var kp3=DATA.keyparts[+m[2]];
+    if(!stg||!kp3) return null;
+    var e2=stg.entries[kp3.idx];
+    var arr = m[3]==="do"?e2.do:e2.avoid;
+    var lbl2 = m[3]==="do"?"Things to do":"Things to avoid";
+    return {title:arr[+m[4]], trail:areaName(kp3.aid)+" › "+kp3.name+" › "+stg.label+" guide › "+lbl2};
+  }
+  return null;
+}
+function areaName(aid){ for(var i=0;i<AREAS.length;i++) if(AREAS[i].id===aid) return AREAS[i].name; return ""; }
+function areaOf(aid){ for(var i=0;i<AREAS.length;i++) if(AREAS[i].id===aid) return AREAS[i]; return null; }
+
+/* ================= RENDER ================= */
+var tree = document.getElementById("tree");
+function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+
+/* ---- Glossary (patterns match the HTML-escaped text; order = priority, longest first) ---- */
+var TERMS = [
+ {id:"sbf", n:"Stocks, bonds & funds", p:"stocks,\\s*bonds\\s*&amp;\\s*funds", d:"Three common ways to invest. A stock is a small ownership share of a company. A bond is a loan you make to a company or government that pays you interest. A fund (such as a mutual fund or ETF) pools money from many people to buy a whole basket of stocks or bonds at once, which spreads out your risk."},
+ {id:"529", n:"529 plan", p:"529(?:\\s+college\\s+saving\\s+plans?|\\s+plans?|\\s+withdrawals?)?", d:"A special savings account for education costs, named after a section of the tax code. Money you invest in it grows tax-free, and withdrawals are also tax-free as long as they're used for qualified education expenses like tuition, books, or (within limits) student loans. Often opened by parents or grandparents for a child."},
+ {id:"roth", n:"Roth IRA", p:"Roth(?:\\s+IRAs?)?", d:"A retirement account you fund with money you've already paid taxes on. The trade-off: your investments grow tax-free and you pay no taxes when you withdraw in retirement. You need earned income (like a paycheck) to contribute, which is why even teens with jobs can open one — starting young gives the money decades to grow."},
+ {id:"401k", n:"401(k)", p:"401\\(k\\)s?", d:"A retirement savings plan offered through an employer. Money is taken from your paycheck before taxes and invested, and many employers add extra money as a match. You generally pay taxes when you withdraw it in retirement, and pulling money out early usually triggers penalties."},
+ {id:"ira", n:"IRA", p:"IRAs?", d:"Short for Individual Retirement Account — a retirement account you open on your own, outside of work. Money invested in it gets special tax treatment to encourage long-term saving. The two main types are traditional (tax break now, taxed later) and Roth (taxed now, tax-free later)."},
+ {id:"custodial", n:"Custodial account", p:"(?:parent-linked\\s+)?custodial(?:\\s+brokerage)?(?:\\s+(?:investment\\s+)?accounts?)?", d:"A savings or investment account that an adult (the custodian, usually a parent) opens and manages for a minor. The money legally belongs to the child, who takes full control of the account when they reach adulthood."},
+ {id:"brokerage", n:"Brokerage account", p:"brokerage(?:\\s+accounts?)?", d:"An account that lets you buy and sell investments like stocks, bonds, and funds. Unlike retirement accounts, there are no special tax breaks — but also no restrictions on when you can take your money out."},
+ {id:"pension", n:"Pension", p:"pensions?", d:"A retirement plan, usually from an employer or government, that pays you a steady income for life after you retire. The amount is typically based on your salary and years of service. Pensions are less common today than 401(k)-style plans, where you save and invest yourself."},
+ {id:"annuity", n:"Annuity", p:"annuit(?:y|ies)", d:"A contract with an insurance company: you pay in money (all at once or over time), and in return the company pays you a stream of income, often guaranteed for life. People use annuities to make sure they don't outlive their savings. Terms and fees vary a lot, so they deserve careful comparison."},
+ {id:"cashvalue", n:"Cash-value insurance", p:"cash-value(?:\\s+(?:life\\s+)?insurance)?", d:"A type of life insurance (such as whole life) that does two things: it pays your beneficiaries if you die, and it builds up a savings balance — the \u201ccash value\u201d — you can borrow against or withdraw while alive. It costs more than plain term life insurance, which only provides the death benefit."},
+ {id:"dividends", n:"Dividends", p:"dividends?", d:"A share of a company's profits paid out to the people who own its stock, usually every few months. Dividends can be taken as cash or reinvested to buy more shares — reinvesting is one of the main ways investments compound over time."},
+ {id:"compound", n:"Compounding", p:"compound(?:ing)?(?:\\s+(?:returns|interest|growth))?", d:"When your money earns returns, and then those returns start earning returns of their own. Over many years this snowballs: the earlier you start saving, the more powerful it becomes. It also works against you with debt — unpaid interest gets added to what you owe and starts growing too."},
+ {id:"diversif", n:"Diversification", p:"diversif(?:ication|ied|ying|y)", d:"Spreading your money across many different investments instead of betting on just one or two. If one investment does badly, the others cushion the blow. A simple way to diversify is through funds that hold hundreds of stocks or bonds at once."},
+ {id:"payday", n:"Payday loan", p:"payday\\s+loans?", d:"A small, short-term loan meant to tide you over until your next paycheck. They are one of the most expensive ways to borrow — fees often work out to annual interest rates of several hundred percent — and can trap people in a cycle of re-borrowing. Best avoided."},
+ {id:"creditscore", n:"Credit score", p:"credit\\s+scores?", d:"A number (usually 300–850) that summarizes how reliably you've borrowed and repaid money. Lenders, landlords, and sometimes employers and insurers check it. Paying bills on time and keeping credit card balances low raise it; missed payments and maxed-out cards lower it."},
+ {id:"creditline", n:"Credit line", p:"credit\\s+line(?:\\s+draws)?|line\\s+of\\s+credit", d:"An arrangement where a lender approves you to borrow up to a set limit whenever you need it, rather than handing you one lump sum. You only pay interest on what you actually use (\u201cdraw\u201d). Credit cards work this way; so do home equity lines of credit."},
+ {id:"revmortgage", n:"Reverse mortgage", p:"reverse\\s+mortgages?", d:"A loan for homeowners (usually 62+) that lets them turn part of their home's value into cash while still living there. Instead of you paying the lender, the lender pays you — and the loan is repaid, with interest, when the home is sold or the owner passes away. Fees are significant and it reduces what heirs inherit, so it warrants careful advice."},
+ {id:"cashout", n:"Cash-out refinancing", p:"cash-out\\s+refinanc(?:ing|e)", d:"Replacing your existing mortgage with a bigger one and pocketing the difference in cash. It converts home equity into spending money, but it raises your debt, restarts your loan clock, and puts your home on the line — so it deserves real caution."},
+ {id:"mortgage", n:"Mortgage", p:"mortgages?", d:"A loan used to buy a home, paid back monthly over many years (often 15 or 30). The home itself is the lender's collateral — if payments stop, the lender can take the house. Each payment covers interest plus a bit of the amount borrowed (the principal)."},
+ {id:"grosspay", n:"Gross pay", p:"gross(?:\\s+pay|-pay)", d:"Your total earnings before anything is taken out — the headline number in a job offer. It's always bigger than what actually lands in your bank account, because taxes and other deductions come out first."},
+ {id:"netpay", n:"Net pay", p:"net\\s+pay", d:"Your take-home pay: what's actually deposited after taxes, Social Security, Medicare, and any benefit costs are subtracted from your gross pay. This is the number to plan your spending around."},
+ {id:"withholding", n:"Withholding", p:"withholding", d:"Money your employer takes out of each paycheck and sends to the government toward your income taxes. It's an estimate — when you file your tax return, you settle up: a refund if too much was withheld, a bill if too little."},
+ {id:"payrolltax", n:"Payroll taxes", p:"payroll\\s+taxes", d:"Taxes taken directly from paychecks to fund Social Security and Medicare. You pay a set percentage of your wages and your employer pays a matching share. These come out of every paycheck, separate from income tax."},
+ {id:"socsec", n:"Social Security", p:"Social\\s+Security", d:"A U.S. government program that pays monthly income to retirees (and to some disabled workers and survivors), funded by payroll taxes during your working years. Your benefit depends on your earnings history and the age you start collecting — claiming later means larger monthly checks."},
+ {id:"medicare", n:"Medicare", p:"Medicare", d:"The U.S. government health insurance program mainly for people 65 and older. It covers much of the cost of hospital care, doctor visits, and prescriptions, though most people still pay premiums and out-of-pocket costs, and many buy supplemental coverage."},
+ {id:"crypto", n:"Crypto", p:"crypto", d:"Short for cryptocurrency — digital money like Bitcoin that isn't issued by any government or bank. Prices can swing wildly, holdings can be lost or stolen if not secured properly, and it has fewer protections than regular bank accounts or investments. Generally treated as a high-risk, speculative asset."},
+ {id:"equity", n:"Equity", p:"(?:home[- ])?equity", d:"Ownership value. In a home, equity is what the home is worth minus what you still owe on it. As pay, equity means being given shares (or options on shares) of your employer's company. Either way, it's wealth you own rather than cash in hand."},
+ {id:"estateplan", n:"Estate plan", p:"estate\\s+(?:plan(?:s|ning)?|documents)", d:"The set of legal documents that says what happens to your money, property, and responsibilities if you die or can't make decisions — typically a will, beneficiary designations, and powers of attorney, sometimes a trust. Keeping it current spares your family confusion, delay, and legal costs."},
+ {id:"trusts", n:"Trust", p:"trusts", d:"A legal arrangement where one person or institution (the trustee) holds and manages assets for the benefit of someone else. Trusts can pass wealth to heirs without going through court, set rules on how money is used, and help manage affairs if the owner becomes unable to."},
+ {id:"wills", n:"Will", p:"wills", d:"A legal document stating who should receive your money and belongings when you die, and who should carry out those wishes (and care for minor children, if any). Without one, state law decides — which may not match what you'd have wanted."},
+ {id:"powers", n:"Powers of attorney", p:"powers", d:"Legal documents naming someone you trust to act for you if you can't — one for financial decisions and one for healthcare. Without them, your family may need a court's permission to manage your affairs."},
+ {id:"beneficiary", n:"Beneficiary", p:"beneficiar(?:y|ies)", d:"The person (or people) named to receive the money in an account or insurance policy when the owner dies. Beneficiary designations on retirement accounts and life insurance override what a will says, so it's important to keep them up to date after major life changes."},
+ {id:"ltc", n:"Long-term care", p:"long-term[- ]care(?:\\s+coverage)?", d:"Extended help with daily living — such as home aides, assisted living, or nursing home care — usually needed later in life. Regular health insurance and Medicare cover very little of it, and it can be one of retirement's largest costs, which is why some people buy long-term-care insurance."},
+ {id:"umbrella", n:"Umbrella policy", p:"umbrella", d:"An extra layer of liability insurance that kicks in above the limits of your home and auto policies. If you're sued over an accident, it protects your savings and assets. Coverage is typically sold in million-dollar increments and is relatively inexpensive."},
+ {id:"deductible", n:"Deductible", p:"deductibles?", d:"The amount you must pay out of your own pocket before your insurance starts paying. A higher deductible usually means a lower premium (your regular payment), but more risk to you when something goes wrong."},
+ {id:"inflation", n:"Inflation", p:"inflation", d:"The gradual rise in prices over time, which means each dollar buys a little less each year. It's a key reason long-term savings are usually invested rather than left as cash — money that doesn't grow slowly loses purchasing power."},
+ {id:"liquidity", n:"Liquidity", p:"liquid(?:ity)?", d:"How quickly and easily something can be turned into spendable cash without losing value. Money in a savings account is very liquid; a house or a business is not. Keeping some liquid money matters because emergencies don't wait for a good time to sell."},
+ {id:"principal", n:"Principal", p:"principal", d:"The core amount of money itself — the amount you originally borrowed on a loan, or originally invested. Interest is what's charged (or earned) on top of the principal."},
+ {id:"pto", n:"PTO", p:"PTO", d:"Paid Time Off — vacation, sick, and personal days your employer pays you for even though you're not working. It's part of your total compensation, worth real money when comparing job offers."},
+ {id:"creep", n:"Lifestyle creep", p:"lifestyle\\s+creep", d:"The tendency for spending to quietly rise every time income does — a nicer car, more dining out, bigger subscriptions — so that no matter how much you earn, nothing extra gets saved. Guarding against it is one of the most powerful wealth-building habits."},
+ {id:"rebalance", n:"Rebalancing", p:"rebalanc(?:e|ing|ed)", d:"Periodically adjusting your investments back to your intended mix. If stocks have a great year, they may grow to be a bigger share of your money than you planned — rebalancing sells a bit of what's grown and buys what's lagged, keeping your risk where you want it."},
+ {id:"taxadv", n:"Tax-advantaged", p:"tax-advantaged", d:"Describes accounts that get special tax breaks to encourage saving — like 401(k)s, IRAs, and 529 plans. The advantage may be paying no tax on money going in, no tax while it grows, no tax coming out, or some combination."},
+ {id:"match", n:"Employer match", p:"employer\\s+match(?:es|ing)?", d:"Free money many employers add to your retirement plan: for example, matching every dollar you contribute up to a set percent of your salary. Not contributing enough to get the full match is leaving part of your pay on the table."}
+];
+var TERM_MAP = {};
+var TERM_RX = new RegExp("\\b(?:"+TERMS.map(function(t){ TERM_MAP[t.id]=t; return "("+t.p+")"; }).join("|")+")\\b","gi");
+TERMS.forEach(function(t){ t.rx = new RegExp("^(?:"+t.p+")$","i"); });
+function linkify(raw){
+  var s = esc(raw);
+  return s.replace(TERM_RX, function(m){
+    for(var i=0;i<TERMS.length;i++){ if(TERMS[i].rx.test(m)) return '<button type="button" class="term" data-td="'+TERMS[i].id+'">'+m+'</button>'; }
+    return m;
+  });
+}
+
+function flagDotHtml(id, cls){
+  var v=flags[id]||0;
+  return '<button class="'+cls+' '+flagClass(v)+'" data-flag="'+id+'" aria-label="Flag"></button>';
+}
+
+function render(){
+  var html = "";
+  if(path.length===0){
+    html += apexFocus();
+    html += '<div class="kids" data-bus="1">'+AREAS.map(areaChild).join("")+'</div>';
+  } else if(path.length===1){
+    var a = areaOf(path[0]);
+    html += '<div class="anc apexanc card clickable" data-nav="home"><svg class="up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span class="at">Personal Wealth Map™</span></div>';
+    html += '<div class="focus card tint-'+a.id+'"><div class="eyebrow">MAJOR WEALTH AREA</div><div class="ft">'+esc(a.name)+'</div><div class="fd">'+esc(a.desc)+'</div></div>';
+    html += '<div class="kids" data-bus="1">'+kpsOf(a.id).map(function(kp){return kpChild(kp,a.id);}).join("")+'</div>';
+  } else {
+    var a2 = areaOf(path[0]); var kp = DATA.keyparts[path[1]];
+    html += '<div class="anc apexanc card clickable" data-nav="home"><svg class="up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span class="at">Personal Wealth Map™</span></div>';
+    html += '<div class="anc card clickable tint-'+a2.id+'" data-nav="area:'+a2.id+'"><svg class="up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span class="at">'+esc(a2.name)+'</span></div>';
+    html += '<div class="focus card edge-'+a2.id+'">'+flagDotHtml(kpFlagId(kp),"flagdot")+'<div class="eyebrow" style="color:var(--'+a2.id+'-d)">KEY PART</div><div class="ft">'+esc(kp.name)+'</div><div class="fd">'+esc(kp.desc)+'</div></div>';
+    html += '<div class="pairrow" data-bus="1">'+pairCard(kp,"ex")+pairCard(kp,"en")+'</div>';
+    html += guideCard(kp);
+  }
+  tree.innerHTML = html;
+  renderCrumbs();
+  requestAnimationFrame(drawLinks);
+  if(pendingPulse){
+    var el = tree.querySelector('[data-flag="'+pendingPulse+'"]');
+    if(el){ var row = el.closest(".itemrow"); if(row){ row.classList.add("pulse"); row.scrollIntoView({block:"center",behavior:"smooth"}); } }
+    pendingPulse = null;
+  } else {
+    window.scrollTo(0,0);
+  }
+}
+
+function apexFocus(){
+  return '<div class="focus apex card"><div class="eyebrow">INSIGHTMAPS</div><div class="ft">PERSONAL WEALTH MAP<sup>™</sup></div><div class="fd">Build wealth and financial freedom over time</div></div>';
+}
+function areaChild(a){
+  var n = kpsOf(a.id).length;
+  return '<div class="child card clickable tint-'+a.id+'" data-nav="area:'+a.id+'"><div class="eyebrow">MAJOR WEALTH AREA</div><div class="ct">'+esc(a.name)+'</div><div class="cd">'+esc(a.desc)+'</div><div class="cmeta"><span>'+n+' key parts</span><svg class="arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div></div>';
+}
+function kpChild(kp, aid){
+  return '<div class="child card clickable" data-nav="kp:'+kp.idx+'">'+flagDotHtml(kpFlagId(kp),"flagdot")+'<div class="eyebrow" style="color:var(--'+aid+'-d)">KEY PART</div><div class="ct">'+esc(kp.name)+'</div><div class="cd">'+esc(kp.desc)+'</div><div class="cmeta"><span>Guide for every life stage</span><svg class="arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div></div>';
+}
+function pairCard(kp, which){
+  var list = which==="ex"?kp.examples:kp.enablers;
+  var title = which==="ex"?"Examples / Scope":"Strengthening Skills / Resources";
+  var aid = kp.aid;
+  var rows = list.map(function(txt,i){
+    var id = itemFlagId(kp,which,i);
+    return '<div class="itemrow"><span class="dot" style="background:var(--'+aid+'-d)"></span><span class="itxt">'+linkify(txt)+'</span>'+flagDotHtml(id,"iflag")+'</div>';
+  }).join("");
+  return '<div class="paircard card"><div class="eyebrow pairhead" style="color:var(--'+aid+'-d)">'+title.toUpperCase()+'</div><div class="listwrap">'+rows+'</div></div>';
+}
+var CHECK='<svg viewBox="0 0 24 24"><path d="M4.5 12.5l5 5L19.5 7"/></svg>';
+var CROSS='<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+function stFlagId(kp,list,i){ return "st:"+curStage+":"+kp.idx+":"+list+":"+i; }
+function guideCard(kp){
+  var stg = STAGES[curStage];
+  var e = stg.entries[kp.idx];
+  var hm = e.h.match(/^(.*?)(—.*)$/);
+  var hHtml = hm ? linkify(hm[1])+'<span class="gtail">'+linkify(hm[2])+'</span>' : linkify(e.h);
+  function li(t,i,list,icon){
+    var id = stFlagId(kp,list,i);
+    var v = flags[id]||0;
+    return '<li class="'+flagClass(v)+'"><button type="button" class="bub" data-flag="'+id+'" aria-label="Flag this item">'+icon+'</button><span>'+linkify(t)+'</span></li>';
+  }
+  return '<div class="guide card"><div class="gstage">YOUR STAGE · '+esc(stg.full)+'</div>'+
+    '<div class="gh">'+hHtml+'</div>'+
+    '<div class="gc">'+linkify(e.c)+'</div>'+
+    '<div class="dolists">'+
+      '<div class="dolist dos"><div class="dh">THINGS TO DO</div><ul>'+e.do.map(function(t,i){return li(t,i,"do",CHECK);}).join("")+'</ul></div>'+
+      '<div class="dolist avoids"><div class="dh">THINGS TO AVOID</div><ul>'+e.avoid.map(function(t,i){return li(t,i,"av",CROSS);}).join("")+'</ul></div>'+
+    '</div></div>';
+}
+
+function renderCrumbs(){
+  var c = document.getElementById("crumbs");
+  var parts = ['<span class="crumb'+(path.length?' link" data-nav="home':'')+'">Top</span>'];
+  if(path.length>=1){
+    var a = areaOf(path[0]);
+    parts.push('<span class="crumb'+(path.length>1?' link" data-nav="area:'+a.id+'':'')+'">'+esc(a.name)+'</span>');
+  }
+  if(path.length>=2) parts.push('<span class="crumb">'+esc(DATA.keyparts[path[1]].name)+'</span>');
+  c.innerHTML = parts.join('<span class="csep">›</span>');
+}
+
+/* ================= CONNECTORS ================= */
+var linksEl = document.getElementById("links");
+function drawLinks(){
+  var stageEl = document.getElementById("stageEl");
+  var sr = stageEl.getBoundingClientRect();
+  linksEl.setAttribute("width", sr.width);
+  linksEl.setAttribute("height", stageEl.scrollHeight);
+  linksEl.setAttribute("viewBox", "0 0 "+sr.width+" "+stageEl.scrollHeight);
+  var d = "";
+  function rel(r){ return {x:r.left-sr.left, y:r.top-sr.top+ (window.scrollY? 0:0), w:r.width, h:r.height}; }
+  // vertical chain: connect each direct child of .tree to the next (anc→anc→focus)
+  var seq = Array.prototype.slice.call(tree.children);
+  for(var i=0;i<seq.length-1;i++){
+    var a = seq[i], b = seq[i+1];
+    var ra = rel(a.getBoundingClientRect()), rb = rel(b.getBoundingClientRect());
+    if(b.hasAttribute("data-bus")){
+      // parent = a; children = b's children
+      var kidsAll = Array.prototype.slice.call(b.children).map(function(k){ return rel(k.getBoundingClientRect()); });
+      if(!kidsAll.length) continue;
+      var minTop = Math.min.apply(null, kidsAll.map(function(k){return k.y;}));
+      var kids = kidsAll.filter(function(k){ return k.y < minTop + 8; }); // first row only
+      var px = ra.x + ra.w/2, py = ra.y + ra.h;
+      var busY = py + (minTop - py)/2;
+      var xs = kids.map(function(k){ return k.x + k.w/2; }).sort(function(a,b2){return a-b2;});
+      var minX = Math.min.apply(null, xs.concat([px])), maxX = Math.max.apply(null, xs.concat([px]));
+      var rr = Math.max(4, Math.min(14, (minTop - busY)/2, (busY - py)/2));
+      // stem
+      d += "M"+px+" "+py+" L"+px+" "+busY+" ";
+      // bus (leave room for rounded outer corners)
+      var busL = (minX < px - 1) ? minX + rr : px;
+      var busR = (maxX > px + 1) ? maxX - rr : px;
+      if(busL < busR) d += "M"+busL+" "+busY+" L"+busR+" "+busY+" ";
+      // child drops (rounded on the two outermost, straight Ts inside)
+      xs.forEach(function(x){
+        if(x < px - 1 && Math.abs(x - minX) < 1){
+          d += "M"+(x+rr)+" "+busY+" Q"+x+" "+busY+" "+x+" "+(busY+rr)+" L"+x+" "+minTop+" ";
+        } else if(x > px + 1 && Math.abs(x - maxX) < 1){
+          d += "M"+(x-rr)+" "+busY+" Q"+x+" "+busY+" "+x+" "+(busY+rr)+" L"+x+" "+minTop+" ";
+        } else {
+          d += "M"+x+" "+busY+" L"+x+" "+minTop+" ";
+        }
+      });
+    } else {
+      // simple vertical connector between two stacked cards
+      var x1 = ra.x + ra.w/2, y1 = ra.y + ra.h;
+      var x2 = rb.x + rb.w/2, y2 = rb.y;
+      if(Math.abs(x1-x2)<2){ d += "M"+x1+" "+y1+" L"+x2+" "+y2+" "; }
+      else { var my=(y1+y2)/2; d += "M"+x1+" "+y1+" L"+x1+" "+my+" L"+x2+" "+my+" L"+x2+" "+y2+" "; }
+    }
+  }
+  linksEl.innerHTML = '<path d="'+d+'"/>';
+}
+window.addEventListener("resize", function(){ requestAnimationFrame(drawLinks); });
+
+/* ================= NAV ================= */
+document.addEventListener("click", function(ev){
+  var tm = ev.target.closest(".term");
+  if(tm){
+    ev.stopPropagation();
+    var t = TERM_MAP[tm.getAttribute("data-td")];
+    if(t){
+      document.getElementById("termName").textContent = t.n;
+      document.getElementById("termDef").textContent = t.d;
+      document.getElementById("termOvl").classList.add("open");
+    }
+    return;
+  }
+  var f = ev.target.closest("[data-flag]");
+  if(f){
+    ev.stopPropagation();
+    var v = cycleFlag(f.getAttribute("data-flag"));
+    var target = f.classList.contains("bub") ? f.parentNode : f;
+    target.className = target.className.replace(/\b(imp|pri)\b/g,"").replace(/\s+/g," ").trim() + (v?(" "+flagClass(v)):"");
+    return;
+  }
+  var n = ev.target.closest("[data-nav]");
+  if(n){
+    var nv = n.getAttribute("data-nav");
+    if(nv==="home") path=[];
+    else if(nv.indexOf("area:")===0) path=[nv.slice(5)];
+    else if(nv.indexOf("kp:")===0){ var kp=DATA.keyparts[+nv.slice(3)]; path=[kp.aid, kp.idx]; }
+    render();
+    return;
+  }
+  var cl = ev.target.closest("[data-close]");
+  if(cl){ document.getElementById(cl.getAttribute("data-close")).classList.remove("open"); return; }
+  var ov = ev.target.classList && ev.target.classList.contains("ovl");
+  if(ov){ ev.target.classList.remove("open"); }
+});
+document.getElementById("topBtn").addEventListener("click", function(){ path=[]; render(); });
+document.getElementById("aboutBtn").addEventListener("click", function(){ document.getElementById("aboutOvl").classList.add("open"); });
+document.getElementById("flagsBtn").addEventListener("click", function(){ renderFlagsPanel(); document.getElementById("flagsOvl").classList.add("open"); });
+
+/* ================= STAGE SELECTOR ================= */
+var chipsEl = document.getElementById("stageChips");
+function renderChips(){
+  chipsEl.innerHTML = STAGES.map(function(s,i){
+    return '<button class="stagechip'+(i===curStage?" on":"")+'" data-stage="'+i+'">'+esc(s.label)+' <span class="age">'+esc(s.age)+'</span></button>';
+  }).join("");
+}
+chipsEl.addEventListener("click", function(ev){
+  var b = ev.target.closest("[data-stage]");
+  if(!b) return;
+  curStage = +b.getAttribute("data-stage");
+  lsSet(STAGE_KEY, String(curStage));
+  renderChips();
+  buildStageIndex();
+  if(path.length===2) render();
+});
+
+/* ================= SEARCH ================= */
+var searchIn = document.getElementById("searchIn");
+var sdrop = document.getElementById("sdrop");
+var INDEX = [];
+DATA.keyparts.forEach(function(kp){
+  INDEX.push({t:kp.name, trail:areaName(kp.aid), nav:{p:[kp.aid,kp.idx]}, pulse:null});
+  kp.examples.forEach(function(x,i){ INDEX.push({t:x, trail:areaName(kp.aid)+" › "+kp.name+" › Examples / Scope", nav:{p:[kp.aid,kp.idx]}, pulse:itemFlagId(kp,"ex",i)}); });
+  kp.enablers.forEach(function(x,i){ INDEX.push({t:x, trail:areaName(kp.aid)+" › "+kp.name+" › Assets / Enablers", nav:{p:[kp.aid,kp.idx]}, pulse:itemFlagId(kp,"en",i)}); });
+});
+AREAS.forEach(function(a){ INDEX.push({t:a.name, trail:"Major Wealth Area", nav:{p:[a.id]}, pulse:null}); });
+var STAGE_INDEX = [];
+function buildStageIndex(){
+  STAGE_INDEX = [];
+  var stg = STAGES[curStage];
+  DATA.keyparts.forEach(function(kp){
+    var e = stg.entries[kp.idx];
+    var trail = areaName(kp.aid)+" › "+kp.name+" › "+stg.label+" guide";
+    STAGE_INDEX.push({t:e.h, trail:trail, nav:{p:[kp.aid,kp.idx]}, pulse:null});
+    e.do.forEach(function(t){ STAGE_INDEX.push({t:t, trail:trail+" › Things to do", nav:{p:[kp.aid,kp.idx]}, pulse:null}); });
+    e.avoid.forEach(function(t){ STAGE_INDEX.push({t:t, trail:trail+" › Things to avoid", nav:{p:[kp.aid,kp.idx]}, pulse:null}); });
+  });
+}
+buildStageIndex();
+
+var kbIdx = -1, curResults = [];
+function runSearch(){
+  var q = searchIn.value.trim().toLowerCase();
+  kbIdx = -1;
+  if(q.length<2){ sdrop.classList.remove("open"); sdrop.innerHTML=""; curResults=[]; return; }
+  curResults = INDEX.concat(STAGE_INDEX).filter(function(it){ return it.t.toLowerCase().indexOf(q)>=0; }).slice(0,30);
+  if(!curResults.length){ sdrop.innerHTML='<div class="snone">No matches.</div>'; sdrop.classList.add("open"); return; }
+  var re = new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig");
+  sdrop.innerHTML = curResults.map(function(it,i){
+    return '<button class="srow" data-sr="'+i+'"><div class="st">'+esc(it.t).replace(re,"<mark>$1</mark>")+'</div><div class="strail">'+esc(it.trail)+'</div></button>';
+  }).join("");
+  sdrop.classList.add("open");
+}
+searchIn.addEventListener("input", runSearch);
+searchIn.addEventListener("keydown", function(ev){
+  if(!sdrop.classList.contains("open")) return;
+  var rows = sdrop.querySelectorAll(".srow");
+  if(ev.key==="ArrowDown"){ ev.preventDefault(); kbIdx=Math.min(kbIdx+1,rows.length-1); }
+  else if(ev.key==="ArrowUp"){ ev.preventDefault(); kbIdx=Math.max(kbIdx-1,0); }
+  else if(ev.key==="Enter"){ ev.preventDefault(); if(kbIdx>=0&&rows[kbIdx]) rows[kbIdx].click(); else if(rows[0]) rows[0].click(); return; }
+  else if(ev.key==="Escape"){ sdrop.classList.remove("open"); return; }
+  else return;
+  rows.forEach(function(r,i){ r.classList.toggle("kb", i===kbIdx); });
+  if(kbIdx>=0) rows[kbIdx].scrollIntoView({block:"nearest"});
+});
+sdrop.addEventListener("click", function(ev){
+  var r = ev.target.closest("[data-sr]"); if(!r) return;
+  var it = curResults[+r.getAttribute("data-sr")];
+  sdrop.classList.remove("open"); searchIn.value="";
+  path = it.nav.p.slice(); pendingPulse = it.pulse;
+  render();
+});
+document.addEventListener("click", function(ev){
+  if(!ev.target.closest(".searchwrap")) sdrop.classList.remove("open");
+});
+
+/* ================= FLAGS PANEL ================= */
+function renderFlagsPanel(){
+  var el = document.getElementById("flagsList");
+  var ids = Object.keys(flags);
+  if(!ids.length){ el.innerHTML = '<div class="fempty">Nothing flagged yet. Tap the circle on any key part or list item — once for <b>Needs improvement</b>, twice for <b>Priority</b>.</div>'; return; }
+  var groups = [{v:2,n:"PRIORITY",c:"var(--flag-pri)"},{v:1,n:"NEEDS IMPROVEMENT",c:"var(--flag-imp)"}];
+  el.innerHTML = groups.map(function(g){
+    var rows = ids.filter(function(id){return flags[id]===g.v;}).map(function(id){
+      var inf = flagInfo(id); if(!inf) return "";
+      return '<div class="frow"><span class="fsw" style="background:'+g.c+'"></span><span><div>'+esc(inf.title)+'</div><div class="ftrail">'+esc(inf.trail)+'</div></span></div>';
+    }).join("");
+    return rows ? '<div class="fgroup"><div class="fgh">'+g.n+'</div>'+rows+'</div>' : "";
+  }).join("");
+}
+document.getElementById("clearFlagsBtn").addEventListener("click", function(){
+  flags = {}; saveFlags(); renderFlagsPanel();
+});
+
+/* ================= PRINT ================= */
+var isEmbedded = false;
+try{ isEmbedded = window.self !== window.top; }catch(e){ isEmbedded = true; }
+
+function copyFooter(cls){
+  return '<div class="'+cls+'"><span>© 2026 GBD Ideas LLC. All rights reserved. www.insightmaps.org · General educational guidance only; individual circumstances may differ.</span><span>InsightMaps · Personal Wealth Map™ · Created by Greg Dickinson</span></div>';
+}
+function buildPoster(){
+  var h = '<div class="pp-h"><div><div class="t">PERSONAL WEALTH MAP™</div><div class="sub">Build wealth and financial freedom over time. Three major wealth areas — Money Sources, Money Uses and Wealth Base — and the thirteen Key Parts within them, with what each covers and the assets and enablers that strengthen it.</div></div><div style="text-align:right;font-size:9px;color:#555">InsightMaps<br>www.insightmaps.org</div></div>';
+  AREAS.forEach(function(a){
+    h += '<div class="pp-area">'+esc(a.name.toUpperCase())+' — '+esc(a.desc)+'</div><div class="pp-grid">';
+    kpsOf(a.id).forEach(function(kp){
+      h += '<div class="pp-kp"><div class="n">'+esc(kp.name)+'</div><div class="d">'+esc(kp.desc)+'</div>'+
+        '<div class="lh">EXAMPLES / SCOPE</div><ul>'+kp.examples.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+'</ul>'+
+        '<div class="lh">ASSETS / ENABLERS</div><ul>'+kp.enablers.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+'</ul></div>';
+    });
+    h += '</div>';
+  });
+  h += copyFooter("pfoot");
+  return h;
+}
+function buildReport(fl){
+  var ids = Object.keys(fl);
+  var pri = ids.filter(function(i){return fl[i]===2;}), imp = ids.filter(function(i){return fl[i]===1;});
+  var h = '<div class="pp-h"><div><div class="t">Improvement Priorities Report</div><div class="sub">Personal Wealth Map™ · InsightMaps · www.insightmaps.org</div></div></div>';
+  h += '<div class="rp-meta"><span><b>'+new Date().toLocaleDateString()+'</b>Prepared</span><span><b>'+ids.length+'</b>Flagged items</span><span><b>'+pri.length+'</b>Priority</span><span><b>'+imp.length+'</b>Needs improvement</span></div>';
+  function rows(list, lbl, color){
+    return list.map(function(id){
+      var inf = flagInfo(id); if(!inf) return "";
+      return '<div class="rp-row"><div class="rt"><span class="rp-flag" style="background:'+color+'">'+lbl+'</span>'+esc(inf.title)+'</div><div class="rtrail">'+esc(inf.trail)+'</div></div>';
+    }).join("");
+  }
+  h += rows(pri,"PRIORITY","#E0A200") + rows(imp,"NEEDS IMPROVEMENT","#5B6B86");
+  if(!ids.length) h += '<div class="rp-row">No items flagged.</div>';
+  h += copyFooter("rfoot");
+  return h;
+}
+function doPrint(kind){
+  if(isEmbedded){
+    var url = location.href.split("#")[0].split("?")[0] + "?print="+kind+"#f="+encodeURIComponent(JSON.stringify(flags));
+    window.open(url, "_blank");
+    return;
+  }
+  var pr = document.getElementById("printRoot");
+  pr.innerHTML = kind==="poster" ? buildPoster() : buildReport(flags);
+  window.print();
+}
+document.getElementById("printBtn").addEventListener("click", function(){ document.getElementById("printOvl").classList.add("open"); });
+document.getElementById("printPosterBtn").addEventListener("click", function(){ document.getElementById("printOvl").classList.remove("open"); doPrint("poster"); });
+document.getElementById("printReportBtn2").addEventListener("click", function(){ document.getElementById("printOvl").classList.remove("open"); doPrint("report"); });
+document.getElementById("printReportBtn").addEventListener("click", function(){ document.getElementById("flagsOvl").classList.remove("open"); doPrint("report"); });
+
+// print-mode entry (opened in a new tab from the iframe)
+(function(){
+  var m = location.search.match(/[?&]print=(poster|report)/);
+  if(!m) return;
+  var fl = flags;
+  var hm = location.hash.match(/#f=(.*)$/);
+  if(hm){ try{ fl = JSON.parse(decodeURIComponent(hm[1]))||{}; }catch(e){} }
+  var pr = document.getElementById("printRoot");
+  pr.innerHTML = m[1]==="poster" ? buildPoster() : buildReport(fl);
+  setTimeout(function(){ window.print(); }, 400);
+})();
+
+/* ================= CONTEXT: expand / back / A2HS ================= */
+(function(){
+  var expand = document.getElementById("expandBtn");
+  if(isEmbedded){
+    expand.href = location.href.split("?")[0].split("#")[0];
+    expand.classList.add("embedded");
+    var syncExpandW = function(){
+      var hb = document.querySelector(".hbtns");
+      if(hb) expand.style.width = hb.getBoundingClientRect().width + "px";
+    };
+    syncExpandW();
+    window.addEventListener("resize", syncExpandW);
+  }
+  if(location.hostname && /(^|\.)insightmaps\.org$/.test(location.hostname) && location.hostname !== "insightmaps.org"){
+    document.getElementById("siteBack").style.display = "flex";
+  }
+  // A2HS
+  var ua = navigator.userAgent||"";
+  var isIphone = /iPhone/.test(ua);
+  var isSafari = /Safari/.test(ua) && !/(CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo)/.test(ua);
+  var standalone = ("standalone" in navigator) && navigator.standalone;
+  if(isIphone && isSafari && !isEmbedded && !standalone && !lsGet(A2HS_KEY)){
+    setTimeout(function(){ document.getElementById("a2hs").classList.add("show"); }, 1400);
+  }
+  document.getElementById("a2hsClose").addEventListener("click", function(){
+    document.getElementById("a2hs").classList.remove("show");
+    lsSet(A2HS_KEY,"1");
+  });
+})();
+
+/* ================= INIT ================= */
+renderChips();
+updateFlagCnt();
+render();
+</script>
+</body>
+</html>
