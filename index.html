@@ -153,17 +153,16 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;pad
 .dolist.dos .dh{color:#1D7A3E}
 .dolist.avoids .dh{color:#B4232C}
 .dolist ul{list-style:none;margin:0;padding:0}
-.dolist li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.5;padding:5px 0}
-.dolist li>span{flex:1;padding-top:3px}
-.bub{width:26px;height:26px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
-  border:1.5px solid transparent;cursor:pointer;transition:background .15s ease,border-color .15s ease}
-.bub svg{width:14px;height:14px;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.dolist.dos .bub{background:#E6F3EB;border-color:#C6E4D2} .dolist.dos .bub svg{stroke:#1D7A3E}
-.dolist.avoids .bub{background:#FBEAEB;border-color:#F1CDCF} .dolist.avoids .bub svg{stroke:#B4232C}
-.bub:hover{border-color:#9A9AA0}
-.dolist li.imp .bub{background:var(--flag-imp) !important;border-color:var(--flag-imp) !important}
-.dolist li.pri .bub{background:var(--flag-pri) !important;border-color:var(--flag-pri) !important}
-.dolist li.imp .bub svg,.dolist li.pri .bub svg{stroke:#fff !important}
+.dolist li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;line-height:1.5;padding:6px 2px;border-bottom:1px solid rgba(0,0,0,.05)}
+.dolist li:last-child{border-bottom:none}
+.dolist li>.ltxt{flex:1}
+.dolist li>svg{width:15px;height:15px;flex:0 0 auto;margin-top:2.5px;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.dolist.dos li>svg{stroke:#1D7A3E}
+.dolist.avoids li>svg{stroke:#B4232C}
+.gflag{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--hair);background:var(--card);cursor:pointer;flex:0 0 auto;margin-top:2px}
+.gflag:hover{border-color:#A8A8AD}
+.gflag.imp{background:var(--flag-imp);border-color:var(--flag-imp)}
+.gflag.pri{background:var(--flag-pri);border-color:var(--flag-pri)}
 .term{color:var(--accent);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px;font:inherit;cursor:pointer;background:none;border:none;padding:0}
 .term:hover{text-decoration-thickness:2px}
 #termPanel{max-width:430px}
@@ -274,7 +273,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;pad
 }
 @media (pointer:coarse){
   .flagdot{width:24px;height:24px}
-  .itemrow .iflag{width:20px;height:20px}
+  .itemrow .iflag,.gflag{width:20px;height:20px}
   .stagechip{padding:8px 14px}
 }
 @media (prefers-reduced-motion:reduce){
@@ -598,8 +597,7 @@ function guideCard(kp){
   var hHtml = hm ? linkify(hm[1])+'<span class="gtail">'+linkify(hm[2])+'</span>' : linkify(e.h);
   function li(t,i,list,icon){
     var id = stFlagId(kp,list,i);
-    var v = flags[id]||0;
-    return '<li class="'+flagClass(v)+'"><button type="button" class="bub" data-flag="'+id+'" aria-label="Flag this item">'+icon+'</button><span>'+linkify(t)+'</span></li>';
+    return '<li>'+icon+'<span class="ltxt">'+linkify(t)+'</span>'+flagDotHtml(id,"gflag")+'</li>';
   }
   return '<div class="guide card"><div class="gstage">YOUR STAGE · '+esc(stg.full)+'</div>'+
     '<div class="gh">'+hHtml+'</div>'+
@@ -692,8 +690,7 @@ document.addEventListener("click", function(ev){
   if(f){
     ev.stopPropagation();
     var v = cycleFlag(f.getAttribute("data-flag"));
-    var target = f.classList.contains("bub") ? f.parentNode : f;
-    target.className = target.className.replace(/\b(imp|pri)\b/g,"").replace(/\s+/g," ").trim() + (v?(" "+flagClass(v)):"");
+    f.className = f.className.replace(/\b(imp|pri)\b/g,"").replace(/\s+/g," ").trim() + (v?(" "+flagClass(v)):"");
     return;
   }
   var n = ev.target.closest("[data-nav]");
